@@ -89,6 +89,14 @@ services:
     ports:
       - 27017:27017
 
+  redis:
+    image: redis
+    container_name: redis
+    command: redis-server --requirepass redis --appendonly yes
+    hostname: redis
+    ports:
+      - '6379:6379'
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
