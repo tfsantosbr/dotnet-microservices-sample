@@ -1,5 +1,73 @@
-version: '2.2'
+version: '3'
 services:
+  # MICROSERVICES
+
+  basket-api:
+    container_name: basket-api
+    image: basket-api
+    build:
+      context: src/Basket.Api
+    ports:
+      - 8081:80
+    networks:
+      - observability-network
+    depends_on:
+      - redis
+
+  orders-api:
+    container_name: orders-api
+    image: orders-api
+    build:
+      context: src/Orders.Api
+    environment:
+      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
+    ports:
+      - 8082:80
+    networks:
+      - observability-network
+    depends_on:
+      - mongo
+      - kafka
+
+  orders-consumer:
+    container_name: orders-consumer
+    image: orders-consumer
+    build:
+      context: src/Orders.Consumer
+    environment:
+      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
+    networks:
+      - observability-network
+    depends_on:
+      - mongo
+      - kafka
+
+  products-api:
+    container_name: products-api
+    image: products-api
+    build:
+      context: src/Products.Api
+    ports:
+      - 8083:80
+    networks:
+      - observability-network
+    depends_on:
+      - mssql
+
+  users-idp:
+    container_name: users-idp
+    image: users-idp
+    build:
+      context: src/users.Idp
+    ports:
+      - 8084:80
+    networks:
+      - observability-network
+    depends_on:
+      - postgres
+
+  # MONITORING SERVICES
+
   apm-server:
     container_name: apm-server
     image: docker.elastic.co/apm/apm-server:7.15.2
@@ -12,6 +80,8 @@ services:
     cap_drop: ['ALL']
     ports:
       - 8200:8200
+    networks:
+      - observability-network
     command: >
       apm-server -e
         -E apm-server.rum.enabled=true
@@ -40,6 +110,8 @@ services:
         soft: -1
     ports:
       - 9200:9200
+    networks:
+      - observability-network
     healthcheck:
       interval: 20s
       retries: 10
@@ -56,10 +128,14 @@ services:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
     ports:
       - 5601:5601
+    networks:
+      - observability-network
     healthcheck:
       interval: 10s
       retries: 20
       test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status
+
+  # DATABASES
 
   postgres:
     container_name: postgres
@@ -70,6 +146,8 @@ services:
       PGDATA: /data/postgres
     ports:
       - 5432:5432
+    networks:
+      - observability-network
 
   mssql:
     image: 'mcr.microsoft.com/mssql/server'
@@ -79,6 +157,8 @@ services:
       ACCEPT_EULA: 'Y'
     ports:
       - 1433:1433
+    networks:
+      - observability-network
 
   mongo:
     image: mongo
@@ -88,6 +168,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: mongo
     ports:
       - 27017:27017
+    networks:
+      - observability-network
 
   redis:
     image: redis
@@ -95,7 +177,11 @@ services:
     command: redis-server --requirepass redis --appendonly yes
     hostname: redis
     ports:
-      - '6379:6379'
+      - 6379:6379
+    networks:
+      - observability-network
+
+  # MESSAGE BROKER
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -103,6 +189,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - observability-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -111,6 +199,8 @@ services:
       - zookeeper
     ports:
       - 9092:9092
+    networks:
+      - observability-network
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -126,5 +216,11 @@ services:
       - kafka
     ports:
       - 9000:9000
+    networks:
+      - observability-network
     environment:
       KAFKA_BROKERCONNECT: kafka:29092
+
+networks:
+  observability-network:
+    driver: bridge

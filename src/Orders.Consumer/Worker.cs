@@ -19,6 +19,8 @@ public class Worker : BackgroundService
         string groupId = _configuration["Kafka:GroupId"];
         string bootstrapServers = _configuration["Kafka:BootstrapServers"];
 
+        _logger.LogInformation($"Conectando ao Kafka: {bootstrapServers}");
+
         var consumerConfig = new ConsumerConfig
         {
             GroupId = groupId,

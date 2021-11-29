@@ -37,10 +37,13 @@ public class OrdersController : ControllerBase
     private async Task SendCreateOrderMessage(string message)
     {
         var topic = _configuration["Kafka:Topics:CreateOrderTopic"];
+        var bootstrapServers = _configuration["Kafka:BootstrapServers"];
+
+        _logger.LogInformation($"Conectando ao Kafka: {bootstrapServers}");
 
         var config = new ProducerConfig
         {
-            BootstrapServers = _configuration["Kafka:BootstrapServers"],
+            BootstrapServers = bootstrapServers,
         };
 
         using var producer = new ProducerBuilder<Null, string>(config).Build();
