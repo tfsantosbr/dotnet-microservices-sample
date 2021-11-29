@@ -24,11 +24,14 @@ public class ProductsImportController : ControllerBase
 
         try
         {
+            _logger.LogInformation($"Start processing at: {DateTime.UtcNow:HH:mm:ss.fff}");
+
             while (DateTime.UtcNow <= endTime)
             {
                 cancelationToken.ThrowIfCancellationRequested();
-                Console.WriteLine($"Time: {DateTime.UtcNow:mm:ss.fff}");
             }
+
+            _logger.LogInformation($"Process terminated at: {DateTime.UtcNow:HH:mm:ss.fff}");
         }
         catch (OperationCanceledException exception)
         {
