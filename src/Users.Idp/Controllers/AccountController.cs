@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Users.Idp.Domain;
+using Users.Idp.Infrastructure.Context;
 using Users.Idp.Models;
 
 namespace Users.Idp.Controllers;
@@ -8,19 +10,24 @@ namespace Users.Idp.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly ILogger<AccountController> _logger;
+    private readonly UsersDbContext _context;
 
-    public AccountController(ILogger<AccountController> logger)
+    public AccountController(ILogger<AccountController> logger, UsersDbContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public IActionResult Create([FromBody] CreateAccount request)
+    public async Task<IActionResult> Create([FromBody] CreateAccount request)
     {
-        var userId = Guid.NewGuid();
+        var user = new User(request.Name, request.Email, request.Password);
 
-        return Created($"account/{userId}", request);
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+
+        return Created($"account/{user.Id}", user);
     }
 
     [HttpDelete("{userId}")]

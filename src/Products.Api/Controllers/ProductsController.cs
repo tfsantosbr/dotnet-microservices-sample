@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Products.Api.Domain.Products;
+using Products.Api.Domain.Products.Commands;
+using Products.Api.Infrastructure.Context;
 
 namespace Products.Api.Controllers;
 
@@ -7,19 +10,28 @@ namespace Products.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly ILogger<ProductsController> _logger;
+    private readonly ProductsDbContext _context;
 
-    public ProductsController(ILogger<ProductsController> logger)
+    public ProductsController(ILogger<ProductsController> logger, ProductsDbContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public IActionResult Create()
+    public async Task<IActionResult> Create([FromBody] CreateProduct request)
     {
-        var productId = Guid.NewGuid();
+        var product = new Product(
+            name: request.Name,
+            price: request.Price,
+            quantity: request.Quantity
+        );
 
-        return Created($"products/{productId}", new { productId });
+        await _context.Products.AddAsync(product);
+        await _context.SaveChangesAsync();
+
+        return Created($"products/{product.Id}", product);
     }
 
     [HttpPut("{productId}")]
