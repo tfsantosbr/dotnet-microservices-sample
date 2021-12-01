@@ -23,6 +23,10 @@ builder.Services.AddDbContext<UsersDbContext>(options =>
 
 var app = builder.Build();
 
+using var scope = app.Services.CreateScope();
+using var context = scope.ServiceProvider.GetService<UsersDbContext>();
+context?.Database.EnsureCreated();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -14,6 +14,10 @@ builder.Services.AddDbContext<ProductsDbContext>(options =>
 
 var app = builder.Build();
 
+using var scope = app.Services.CreateScope();
+using var context = scope.ServiceProvider.GetService<ProductsDbContext>();
+context?.Database.EnsureCreated();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
