@@ -1,4 +1,7 @@
+using System.Text.Json;
 using Confluent.Kafka;
+using Orders.Consumer.Models;
+using Orders.Consumer.Repositories;
 
 namespace Orders.Consumer;
 
@@ -6,11 +9,13 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _configuration;
+    private readonly OrderRepository _repository;
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration)
+    public Worker(ILogger<Worker> logger, IConfiguration configuration, OrderRepository repository)
     {
         _logger = logger;
         _configuration = configuration;
+        _repository = repository;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,7 +48,16 @@ public class Worker : BackgroundService
                 {
                     var result = consumer.Consume(stoppingToken);
 
-                    _logger.LogInformation($"[ORDER CREATED]: '{result.Message.Value}'");
+                    var order = GetOrder(result.Message.Value);
+
+                    if (order == null)
+                        throw new NullReferenceException(nameof(order));
+
+                    _logger.LogInformation($"[ORDER RECEIVED]: '{order.OrderId}' | Products Count: {order.Products?.Count()}");
+
+                    await _repository.CreateAsync(order);
+
+                    _logger.LogInformation($"[ORDER SAVED]: '{order.OrderId}'");
                 }
                 catch (ConsumeException exception)
                 {
@@ -60,5 +74,10 @@ public class Worker : BackgroundService
         }
 
         await Task.CompletedTask;
+    }
+
+    private Order? GetOrder(string value)
+    {
+        return JsonSerializer.Deserialize<Order>(value);
     }
 }

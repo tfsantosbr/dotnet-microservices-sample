@@ -20,7 +20,7 @@ public class OrdersController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<IActionResult> Create([FromBody] CreateOrder request)
+    public async Task<IActionResult> Create([FromBody] OrderModel request)
     {
         var createOrderMessage = ConvertToCreateOrderToMessage(request);
 
@@ -29,7 +29,7 @@ public class OrdersController : ControllerBase
         return Accepted();
     }
 
-    private string ConvertToCreateOrderToMessage(CreateOrder request)
+    private string ConvertToCreateOrderToMessage(OrderModel request)
     {
         return JsonSerializer.Serialize(request);
     }
