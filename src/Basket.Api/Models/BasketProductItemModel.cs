@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Basket.Api.Models
 {
-    public class CreateBasketProductItem
+    public class BasketProductItemModel
     {
         public Guid? ProductId { get; set; }
 

@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Basket.Api.Models
 {
-    public class CreateBasket
+    public class BasketModel
     {
         public Guid? UserId { get; set; }
-        public IEnumerable<CreateBasketProductItem>? Products { get; set; }
+        public IEnumerable<BasketProductItemModel>? Products { get; set; }
     }
 }
