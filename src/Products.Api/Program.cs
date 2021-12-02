@@ -1,7 +1,11 @@
+using Elastic.Apm.NetCoreAll;
+using Eventflix.Api.Extensions.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Products.Api.Infrastructure.Context;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -9,8 +13,13 @@ builder.Services.AddSwaggerGen();
 
 // Context configuration
 builder.Services.AddDbContext<ProductsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"))
+    options.UseSqlServer(configuration.GetConnectionString("SqlServer"))
     );
+
+// Add Logs
+builder.Host
+    .AddLogs(configuration)
+    .UseAllElasticApm();
 
 var app = builder.Build();
 
