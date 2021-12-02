@@ -31,6 +31,8 @@ public class ProductsController : ControllerBase
         await _context.Products.AddAsync(product);
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation($"[PRODUCT CREATED] {product.Id}");
+
         return Created($"products/{product.Id}", product);
     }
 
