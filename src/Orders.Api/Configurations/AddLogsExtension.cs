@@ -13,6 +13,11 @@ namespace Eventflix.Api.Extensions.Configurations
             };
 
             host.UseSerilog((context, provider) => provider
+                .Enrich.WithCorrelationId()
+                .Enrich.WithMachineName()
+                .Enrich.WithClientIp()
+                .Enrich.WithClientAgent()
+                .Enrich.WithProperty("AppName", configuration["Elasticsearch:LogsSettings:AppName"])
                 .WriteTo.Console()
                 .WriteTo.Elasticsearch(elasticsearchSinkOptions));
 
