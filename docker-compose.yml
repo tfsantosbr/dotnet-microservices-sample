@@ -7,12 +7,12 @@ services:
     image: basket-api
     build:
       context: src/Basket.Api
-    environment:
-      - CONNECTIONSTRINGS__REDIS=redis,port:6379,password=redis
     ports:
       - 8081:80
     depends_on:
       - redis
+      - elasticsearch
+      - apm-server
 
   orders-api:
     container_name: orders-api
@@ -26,6 +26,8 @@ services:
     depends_on:
       - mongo
       - kafka-setup
+      - elasticsearch
+      - apm-server
 
   orders-consumer:
     container_name: orders-consumer
@@ -34,12 +36,13 @@ services:
       context: src/Orders.Consumer
     environment:
       - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-      - ORDERSDATABASE__CONNECTIONSTRING=mongodb://mongo:mongo@mongo:27017
     depends_on:
       - mongo
       - zookeeper
       - kafka
       - kafka-setup
+      - elasticsearch
+      - apm-server
     restart: on-failure
 
   products-api:
@@ -47,24 +50,24 @@ services:
     image: products-api
     build:
       context: src/Products.Api
-    environment:
-      - CONNECTIONSTRINGS__SQLSERVER=Data Source=mssql;Initial Catalog=ProductsDb;User ID=sa;Password=Dev@123456;
     ports:
       - 8083:80
     depends_on:
       - mssql
+      - elasticsearch
+      - apm-server
 
   users-idp:
     container_name: users-idp
     image: users-idp
     build:
       context: src/users.Idp
-    environment:
-      - CONNECTIONSTRINGS__POSTGRES=Server=postgres;Port=5432;Database=UsersDb;User Id=postgres;Password=postgres;
     ports:
       - 8084:80
     depends_on:
       - postgres
+      - elasticsearch
+      - apm-server
 
   # MONITORING SERVICES
 

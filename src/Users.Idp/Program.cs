@@ -1,3 +1,5 @@
+using Elastic.Apm.NetCoreAll;
+using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,10 @@ builder.Services.AddTransient<IValidator<SignIn>, SignInValidator>();
 builder.Services.AddDbContext<UsersDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
     );
+
+// Add Logs
+builder.Host.AddLogs(builder.Configuration);
+builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
 
