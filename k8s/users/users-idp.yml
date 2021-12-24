@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-idp
+spec:
+  selector:
+    app: users-idp
+  ports:
+    - port: 8004
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-idp
+  labels:
+    app: users-idp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-idp
+  template:
+    metadata:
+      labels:
+        app: users-idp
+    spec:
+      containers:
+        - name: users-idp-container
+          image: users-idp:v1
+          ports:
+            - containerPort: 80

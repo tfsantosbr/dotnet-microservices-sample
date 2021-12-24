@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-consumer
+  labels:
+    app: orders-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-consumer
+  template:
+    metadata:
+      labels:
+        app: orders-consumer
+    spec:
+      containers:
+        - name: orders-consumer-container
+          image: orders-consumer:v2
+          env:
+            - name: KAFKA__BOOTSTRAPSERVERS
+              value: host.docker.internal:9092

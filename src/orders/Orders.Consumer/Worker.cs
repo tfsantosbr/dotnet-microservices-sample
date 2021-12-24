@@ -72,6 +72,10 @@ public class Worker : BackgroundService
             _logger.LogInformation("Cancellation token requested. Canceling Operation...");
             consumer.Close();
         }
+        catch (Exception exception)
+        {
+            throw exception;
+        }
 
         await Task.CompletedTask;
     }

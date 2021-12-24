@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-api
+spec:
+  selector:
+    app: orders-api
+  ports:
+    - port: 8002
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+  labels:
+    app: orders-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-api
+  template:
+    metadata:
+      labels:
+        app: orders-api
+    spec:
+      containers:
+        - name: orders-api-container
+          image: orders-api:v2
+          ports:
+            - containerPort: 80
+          env:
+            - name: KAFKA__BOOTSTRAPSERVERS
+              value: host.docker.internal:9092

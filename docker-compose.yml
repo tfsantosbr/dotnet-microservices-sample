@@ -2,78 +2,78 @@ version: '3'
 services:
   # MICROSERVICES
 
-  basket-api:
-    container_name: basket-api
-    image: basket-api
-    build:
-      context: src/baskets/Basket.Api
-    ports:
-      - 8081:80
-    depends_on:
-      - redis
-      - elasticsearch
-      - apm-server
+  # basket-api:
+  #   container_name: basket-api
+  #   image: basket-api
+  #   build:
+  #     context: src/baskets/Basket.Api
+  #   ports:
+  #     - 8081:80
+  #   depends_on:
+  #     - redis
+  #     - elasticsearch
+  #     - apm-server
 
-  orders-api:
-    container_name: orders-api
-    image: orders-api
-    build:
-      context: src/orders/Orders.Api
-    environment:
-      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-    ports:
-      - 8082:80
-    depends_on:
-      - mongo
-      - kafka-setup
-      - elasticsearch
-      - apm-server
+  # orders-api:
+  #   container_name: orders-api
+  #   image: orders-api
+  #   build:
+  #     context: src/orders/Orders.Api
+  #   environment:
+  #     - KAFKA__BOOTSTRAPSERVERS=kafka:29092
+  #   ports:
+  #     - 8082:80
+  #   depends_on:
+  #     - mongo
+  #     - kafka-setup
+  #     - elasticsearch
+  #     - apm-server
 
-  orders-consumer:
-    container_name: orders-consumer
-    image: orders-consumer
-    build:
-      context: src/orders/Orders.Consumer
-    environment:
-      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-    depends_on:
-      - mongo
-      - zookeeper
-      - kafka
-      - kafka-setup
-      - elasticsearch
-      - apm-server
-    restart: on-failure
+  # orders-consumer:
+  #   container_name: orders-consumer
+  #   image: orders-consumer
+  #   build:
+  #     context: src/orders/Orders.Consumer
+  #   environment:
+  #     - KAFKA__BOOTSTRAPSERVERS=kafka:29092
+  #   depends_on:
+  #     - mongo
+  #     - zookeeper
+  #     - kafka
+  #     - kafka-setup
+  #     - elasticsearch
+  #     - apm-server
+  #   restart: on-failure
 
-  products-api:
-    container_name: products-api
-    image: products-api
-    build:
-      context: src/products/Products.Api
-    ports:
-      - 8083:80
-    depends_on:
-      - mssql
-      - elasticsearch
-      - apm-server
+  # products-api:
+  #   container_name: products-api
+  #   image: products-api
+  #   build:
+  #     context: src/products/Products.Api
+  #   ports:
+  #     - 8083:80
+  #   depends_on:
+  #     - mssql
+  #     - elasticsearch
+  #     - apm-server
 
-  users-idp:
-    container_name: users-idp
-    image: users-idp
-    build:
-      context: src/users/users.Idp
-    ports:
-      - 8084:80
-    depends_on:
-      - postgres
-      - elasticsearch
-      - apm-server
+  # users-idp:
+  #   container_name: users-idp
+  #   image: users-idp
+  #   build:
+  #     context: src/users/users.Idp
+  #   ports:
+  #     - 8084:80
+  #   depends_on:
+  #     - postgres
+  #     - elasticsearch
+  #     - apm-server
 
   # MONITORING SERVICES
 
   apm-server:
     container_name: apm-server
-    image: docker.elastic.co/apm/apm-server:7.15.2
+    image: docker.elastic.co/apm/apm-server:7.16.2
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -98,7 +98,7 @@ services:
 
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     environment:
       - bootstrap.memory_lock=true
       - cluster.name=docker-cluster
@@ -118,7 +118,7 @@ services:
 
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.15.2
+    image: docker.elastic.co/kibana/kibana:7.16.2
     depends_on:
       elasticsearch:
         condition: service_healthy

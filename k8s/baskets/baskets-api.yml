@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: baskets-api
+spec:
+  selector:
+    app: baskets-api
+  ports:
+    - port: 8001
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baskets-api
+  labels:
+    app: baskets-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baskets-api
+  template:
+    metadata:
+      labels:
+        app: baskets-api
+    spec:
+      containers:
+        - name: baskets-api-container
+          image: baskets-api:v1
+          ports:
+            - containerPort: 80
