@@ -6,7 +6,7 @@ services:
     container_name: basket-api
     image: basket-api
     build:
-      context: src/Basket.Api
+      context: src/baskets/Basket.Api
     ports:
       - 8081:80
     depends_on:
@@ -18,7 +18,7 @@ services:
     container_name: orders-api
     image: orders-api
     build:
-      context: src/Orders.Api
+      context: src/orders/Orders.Api
     environment:
       - KAFKA__BOOTSTRAPSERVERS=kafka:29092
     ports:
@@ -33,7 +33,7 @@ services:
     container_name: orders-consumer
     image: orders-consumer
     build:
-      context: src/Orders.Consumer
+      context: src/orders/Orders.Consumer
     environment:
       - KAFKA__BOOTSTRAPSERVERS=kafka:29092
     depends_on:
@@ -49,7 +49,7 @@ services:
     container_name: products-api
     image: products-api
     build:
-      context: src/Products.Api
+      context: src/products/Products.Api
     ports:
       - 8083:80
     depends_on:
@@ -61,7 +61,7 @@ services:
     container_name: users-idp
     image: users-idp
     build:
-      context: src/users.Idp
+      context: src/users/users.Idp
     ports:
       - 8084:80
     depends_on:
