@@ -47,7 +47,7 @@ public class Worker : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var orderExecutionSpan = _tracer.CurrentTransaction?.StartSpan("OrderExecution", "Order");
+                var orderStransaction = _tracer.StartTransaction("Order Process", "Order Transaction");
 
                 try
                 {
@@ -58,25 +58,32 @@ public class Worker : BackgroundService
                     if (order == null)
                         throw new NullReferenceException(nameof(order));
 
-                    // var orderWithoutProducts = order.Products is null || !order.Products.Any();
-
-                    // if (orderWithoutProducts)
-                    // {
-                    //     throw new Exception("This order has no products");
-                    // }
+                    if (order?.Products == null || !order.Products.Any())
+                    {
+                        throw new InvalidOperationException("The order has no products");
+                    }
 
                     _logger.LogInformation($"[ORDER RECEIVED]: '{order.OrderId}' | Products Count: {order.Products?.Count()}");
 
                     await _repository.CreateAsync(order);
 
                     _logger.LogInformation($"[ORDER SAVED]: '{order.OrderId}'");
-
-                    orderExecutionSpan?.End();
+                }
+                catch (InvalidOperationException exception)
+                {
+                    _logger.LogError($"An error ocurred while processing order: {exception.Message}", exception);
+                    orderStransaction.CaptureException(exception);
                 }
                 catch (ConsumeException exception)
                 {
                     _logger.LogError($"An error ocurred while consuming topic: {topic}", exception);
-                    orderExecutionSpan?.CaptureException(exception);
+                    orderStransaction.CaptureException(exception);
+
+                    throw exception;
+                }
+                finally
+                {
+                    orderStransaction.End();
                 }
             }
         }

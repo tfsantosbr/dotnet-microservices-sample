@@ -8,6 +8,7 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.AddTransient<OrderRepository>();
+
         services.AddHostedService<Worker>();
     })
     .UseSerilog((context, provider) =>
