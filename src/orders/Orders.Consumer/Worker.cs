@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Confluent.Kafka;
+using Elastic.Apm.Api;
 using Orders.Consumer.Models;
 using Orders.Consumer.Repositories;
 
@@ -10,12 +11,14 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _configuration;
     private readonly OrderRepository _repository;
+    private readonly ITracer _tracer;
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration, OrderRepository repository)
+    public Worker(ILogger<Worker> logger, IConfiguration configuration, OrderRepository repository, ITracer tracer)
     {
         _logger = logger;
         _configuration = configuration;
         _repository = repository;
+        _tracer = tracer;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,6 +47,8 @@ public class Worker : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                var orderExecutionSpan = _tracer.CurrentTransaction?.StartSpan("OrderExecution", "Order");
+
                 try
                 {
                     var result = consumer.Consume(stoppingToken);
@@ -53,17 +58,25 @@ public class Worker : BackgroundService
                     if (order == null)
                         throw new NullReferenceException(nameof(order));
 
+                    // var orderWithoutProducts = order.Products is null || !order.Products.Any();
+
+                    // if (orderWithoutProducts)
+                    // {
+                    //     throw new Exception("This order has no products");
+                    // }
+
                     _logger.LogInformation($"[ORDER RECEIVED]: '{order.OrderId}' | Products Count: {order.Products?.Count()}");
 
                     await _repository.CreateAsync(order);
 
                     _logger.LogInformation($"[ORDER SAVED]: '{order.OrderId}'");
+
+                    orderExecutionSpan?.End();
                 }
                 catch (ConsumeException exception)
                 {
                     _logger.LogError($"An error ocurred while consuming topic: {topic}", exception);
-
-                    throw exception;
+                    orderExecutionSpan?.CaptureException(exception);
                 }
             }
         }
@@ -71,10 +84,6 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Cancellation token requested. Canceling Operation...");
             consumer.Close();
-        }
-        catch (Exception exception)
-        {
-            throw exception;
         }
 
         await Task.CompletedTask;

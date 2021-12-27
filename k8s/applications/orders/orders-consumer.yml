@@ -19,4 +19,4 @@ spec:
           image: orders-consumer:v2
           env:
             - name: KAFKA__BOOTSTRAPSERVERS
-              value: host.docker.internal:9092
+              value: kafka.default.svc.cluster.local:9092
