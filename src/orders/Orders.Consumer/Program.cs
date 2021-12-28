@@ -1,4 +1,5 @@
 using Elastic.Apm.NetCoreAll;
+using Elastic.Apm.SerilogEnricher;
 using Orders.Consumer;
 using Orders.Consumer.Repositories;
 using Serilog;
@@ -21,6 +22,7 @@ var host = Host.CreateDefaultBuilder(args)
         };
 
         provider
+            .Enrich.WithElasticApmCorrelationInfo()
             .Enrich.WithCorrelationId()
             .Enrich.WithMachineName()
             .Enrich.WithClientIp()

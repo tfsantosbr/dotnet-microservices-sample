@@ -1,3 +1,4 @@
+using Elastic.Apm.EntityFrameworkCore;
 using Elastic.Apm.NetCoreAll;
 using Eventflix.Api.Extensions.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ builder.Services.AddDbContext<ProductsDbContext>(options =>
 
 // Add Logs
 builder.Host.AddLogs(configuration);
-builder.Host.UseAllElasticApm();
+builder.Host.UseAllElasticApm());
 
 var app = builder.Build();
 
