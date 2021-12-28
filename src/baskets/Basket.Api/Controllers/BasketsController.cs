@@ -1,8 +1,8 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Basket.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 
 namespace Basket.Api.Controllers;
 
@@ -11,41 +11,41 @@ namespace Basket.Api.Controllers;
 public class BasketsController : ControllerBase
 {
     private readonly ILogger<BasketsController> _logger;
-    private readonly IDistributedCache _cache;
+    private readonly IConnectionMultiplexer _redis;
 
-    public BasketsController(ILogger<BasketsController> logger, IDistributedCache cache)
+    public BasketsController(ILogger<BasketsController> logger, IConnectionMultiplexer redis)
     {
         _logger = logger;
-        _cache = cache;
+        _redis = redis;
     }
 
     // Public Methods
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
         var userId = request.UserId;
 
-        var existingBasket = await GetBasket(userId, cancellationToken);
+        var existingBasket = await GetBasket(userId);
 
         if (existingBasket != null)
         {
             existingBasket = request;
-            await SaveBasket(existingBasket, cancellationToken);
+            await SaveBasket(existingBasket);
         }
 
         var newBasket = request;
-        await SaveBasket(newBasket, cancellationToken);
+        await SaveBasket(newBasket);
 
         return Ok(request);
     }
 
     [HttpGet("{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(Guid userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(Guid userId)
     {
-        var basket = await GetBasket(userId, cancellationToken);
+        var basket = await GetBasket(userId);
 
         if (basket == null)
             return NotFound();
@@ -55,33 +55,36 @@ public class BasketsController : ControllerBase
 
     [HttpDelete("{userId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Delete(Guid userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(Guid userId)
     {
-        await RemoveBasket(userId, cancellationToken);
+        await RemoveBasket(userId);
 
         return NoContent();
     }
 
     // Private methods
 
-    private Task RemoveBasket(Guid userId, CancellationToken cancellationToken)
+    private async Task RemoveBasket(Guid userId)
     {
-        return _cache.RemoveAsync(userId.ToString(), cancellationToken);
+        var db = _redis.GetDatabase();
+        await db.KeyDeleteAsync(userId.ToString());
     }
 
-    private async Task<BasketModel?> GetBasket(Guid? userId, CancellationToken cancellationToken)
+    private async Task<BasketModel?> GetBasket(Guid? userId)
     {
-        var basketString = await _cache.GetStringAsync(userId.ToString(), cancellationToken);
+        var db = _redis.GetDatabase();
+        var basketString = await db.StringGetAsync(userId.ToString());
 
-        if (basketString == null) return null;
+        if (!basketString.HasValue) return null;
 
         return JsonSerializer.Deserialize<BasketModel>(basketString);
     }
 
-    private async Task SaveBasket(BasketModel basket, CancellationToken cancellationToken)
+    private async Task SaveBasket(BasketModel basket)
     {
+        var db = _redis.GetDatabase();
         var basketString = JsonSerializer.Serialize(basket);
 
-        await _cache.SetStringAsync(basket.UserId.ToString(), basketString, cancellationToken);
+        await db.StringSetAsync(basket.UserId.ToString(), basketString);
     }
 }

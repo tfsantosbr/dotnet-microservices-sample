@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.12.1" />
+    <PackageReference Include="Elastic.Apm.SerilogEnricher" Version="1.5.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

@@ -1,3 +1,4 @@
+using Elastic.Apm.SerilogEnricher;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 
@@ -13,6 +14,7 @@ namespace Eventflix.Api.Extensions.Configurations
             };
 
             host.UseSerilog((context, provider) => provider
+                .Enrich.WithElasticApmCorrelationInfo()
                 .Enrich.WithCorrelationId()
                 .Enrich.WithMachineName()
                 .Enrich.WithClientIp()

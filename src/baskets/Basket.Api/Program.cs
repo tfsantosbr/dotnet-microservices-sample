@@ -1,9 +1,11 @@
 using Basket.Api.Models;
 using Basket.Api.Models.Validators;
 using Elastic.Apm.NetCoreAll;
+using Elastic.Apm.StackExchange.Redis;
 using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,11 +19,9 @@ builder.Services.AddTransient<IValidator<BasketModel>, BasketModelValidator>();
 builder.Services.AddTransient<IValidator<BasketProductItemModel>, BasketProductItemModelValidator>();
 
 // add redis
-builder.Services.AddDistributedRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = builder.Configuration.GetSection("Redis:InstanceName").Value;
-});
+var multiplexer = ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"));
+multiplexer.UseElasticApm();
+builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 
 // add logs
 builder.Host.AddLogs(builder.Configuration);
