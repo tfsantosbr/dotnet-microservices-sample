@@ -1,6 +1,8 @@
+using Confluent.Kafka;
 using Elastic.Apm.Extensions.Hosting;
 using Elastic.Apm.MongoDb;
 using Elastic.Apm.SerilogEnricher;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Orders.Consumer;
 using Orders.Consumer.Configurations.HealthCheck;
@@ -12,12 +14,17 @@ using Serilog.Sinks.Elasticsearch;
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
+        var configuration = context.Configuration;
+
         services.AddTransient<OrderRepository>();
 
         // health check
 
         services.AddHealthChecks()
-            .AddCheck<ExampleHealthCheck>("example-health-check");
+            .AddCheck<ExampleHealthCheck>("example-health-check")
+            .AddMongoDb(configuration.GetSection("OrdersDatabase:ConnectionString").Value)
+            .AddKafka(new ProducerConfig() { BootstrapServers = configuration.GetSection("kafka:BootstrapServers").Value })
+            ;
 
         services.Configure<HealthCheckPublisherOptions>(options =>
         {
