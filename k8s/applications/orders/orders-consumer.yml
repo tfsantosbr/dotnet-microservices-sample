@@ -24,6 +24,6 @@ spec:
             exec:
               command:
                 - cat
-                - /healthy
+                - /app/healthy
             initialDelaySeconds: 10
             periodSeconds: 5
