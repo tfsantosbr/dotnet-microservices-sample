@@ -1,3 +1,4 @@
+using Basket.Api.Configurations.HealthCheck;
 using Basket.Api.Models;
 using Basket.Api.Models.Validators;
 using Elastic.Apm.NetCoreAll;
@@ -8,6 +9,7 @@ using FluentValidation.AspNetCore;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -19,15 +21,23 @@ builder.Services.AddTransient<IValidator<BasketModel>, BasketModelValidator>();
 builder.Services.AddTransient<IValidator<BasketProductItemModel>, BasketProductItemModelValidator>();
 
 // add redis
-var multiplexer = ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"));
+var multiplexer = ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis"));
 multiplexer.UseElasticApm();
 builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+// add health check
+builder.Services.AddHealthChecks()
+    .AddCheck<RedisHealthCheck>("redis-health-check")
+    ;
 
 // add logs
 builder.Host.AddLogs(builder.Configuration);
 builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
+
+// map health check
+app.MapHealthChecks("/healthz");
 
 if (app.Environment.IsDevelopment())
 {

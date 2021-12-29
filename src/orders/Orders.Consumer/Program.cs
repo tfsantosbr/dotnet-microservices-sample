@@ -21,7 +21,6 @@ var host = Host.CreateDefaultBuilder(args)
         // health check
 
         services.AddHealthChecks()
-            .AddCheck<ExampleHealthCheck>("example-health-check")
             .AddMongoDb(configuration.GetSection("OrdersDatabase:ConnectionString").Value)
             .AddKafka(new ProducerConfig() { BootstrapServers = configuration.GetSection("kafka:BootstrapServers").Value })
             ;

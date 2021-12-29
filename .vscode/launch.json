@@ -2,28 +2,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Orders Consumer",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/Orders.Consumer/bin/Debug/net6.0/Orders.Consumer.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/src/Orders.Consumer",
-            "stopAtEntry": false,
-            "console": "internalConsole",
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            }
-        },
-        {
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/Basket.Api/bin/Debug/net6.0/Basket.Api.dll",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/baskets/Basket.Api/bin/Debug/net6.0/Basket.Api.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Basket.Api",
+            "cwd": "${workspaceFolder}/src/baskets/Basket.Api",
             "stopAtEntry": false,
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {
                 "action": "openExternally",
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)"

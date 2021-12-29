@@ -28,6 +28,12 @@ spec:
     spec:
       containers:
         - name: baskets-api-container
-          image: baskets-api:v1
+          image: baskets-api:v3
           ports:
             - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
