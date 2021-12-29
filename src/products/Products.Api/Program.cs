@@ -1,4 +1,3 @@
-using Elastic.Apm.EntityFrameworkCore;
 using Elastic.Apm.NetCoreAll;
 using Eventflix.Api.Extensions.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +12,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHealthChecks()
+    .AddSqlServer(configuration.GetConnectionString("SqlServer"))
+    ;
+
 // Context configuration
 builder.Services.AddDbContext<ProductsDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("SqlServer"))
@@ -23,6 +26,9 @@ builder.Host.AddLogs(configuration);
 builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
+
+// map health check
+app.MapHealthChecks("/healthz");
 
 using var scope = app.Services.CreateScope();
 using var context = scope.ServiceProvider.GetService<ProductsDbContext>();

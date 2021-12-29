@@ -28,6 +28,12 @@ spec:
     spec:
       containers:
         - name: products-api-container
-          image: products-api:v1
+          image: products-api:v2
           ports:
             - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
