@@ -28,6 +28,12 @@ spec:
     spec:
       containers:
         - name: users-idp-container
-          image: users-idp:v1
+          image: users-idp:v2
           ports:
             - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10

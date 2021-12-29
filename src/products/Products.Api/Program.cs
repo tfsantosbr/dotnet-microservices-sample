@@ -12,6 +12,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// add health check
 builder.Services.AddHealthChecks()
     .AddSqlServer(configuration.GetConnectionString("SqlServer"))
     ;

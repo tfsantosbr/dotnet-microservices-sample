@@ -8,6 +8,7 @@ using Users.Idp.Models;
 using Users.Idp.Models.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -18,16 +19,24 @@ builder.Services.AddFluentValidation();
 builder.Services.AddTransient<IValidator<CreateAccount>, CreateAccountValidator>();
 builder.Services.AddTransient<IValidator<SignIn>, SignInValidator>();
 
+// add health check
+builder.Services.AddHealthChecks()
+    .AddNpgSql(configuration.GetConnectionString("Postgres"))
+    ;
+
 // add context
 builder.Services.AddDbContext<UsersDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
+    options.UseNpgsql(configuration.GetConnectionString("Postgres"))
     );
 
 // Add Logs
-builder.Host.AddLogs(builder.Configuration);
+builder.Host.AddLogs(configuration);
 builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
+
+// map health check
+app.MapHealthChecks("/healthz");
 
 using var scope = app.Services.CreateScope();
 using var context = scope.ServiceProvider.GetService<UsersDbContext>();
