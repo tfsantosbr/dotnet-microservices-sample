@@ -1,4 +1,5 @@
-using Elastic.Apm.NetCoreAll;
+using Elastic.Apm.Extensions.Hosting;
+using Elastic.Apm.MongoDb;
 using Elastic.Apm.SerilogEnricher;
 using Orders.Consumer;
 using Orders.Consumer.Repositories;
@@ -31,7 +32,7 @@ var host = Host.CreateDefaultBuilder(args)
             .WriteTo.Console()
             .WriteTo.Elasticsearch(elasticsearchSinkOptions);
     })
-    .UseAllElasticApm()
+    .UseElasticApm(new MongoDbDiagnosticsSubscriber())
     .Build();
 
 await host.RunAsync();
