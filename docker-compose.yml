@@ -170,55 +170,57 @@ services:
     ports:
       - 6379:6379
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: zookeeper
-    ports:
-      - 2181:2181
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+  # MESSAGE BROKER
 
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - 9092:9092
-    expose:
-      - 29092
-    environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_MIN_INSYNC_REPLICAS: 1
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:latest
+  #   container_name: zookeeper
+  #   ports:
+  #     - 2181:2181
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
 
-  kafka-setup:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka-setup
-    depends_on:
-      - kafka
-    entrypoint: ['/bin/sh', '-c']
-    command: |
-      "
-      # blocks until kafka is reachable
-      kafka-topics --bootstrap-server kafka:29092 --list
+  # kafka:
+  #   image: confluentinc/cp-kafka:latest
+  #   container_name: kafka
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - 9092:9092
+  #   expose:
+  #     - 29092
+  #   environment:
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_MIN_INSYNC_REPLICAS: 1
 
-      echo -e 'Creating kafka topics'
-      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic order-created-topic --replication-factor 1 --partitions 3
+  # kafka-setup:
+  #   image: confluentinc/cp-kafka:latest
+  #   container_name: kafka-setup
+  #   depends_on:
+  #     - kafka
+  #   entrypoint: ['/bin/sh', '-c']
+  #   command: |
+  #     "
+  #     # blocks until kafka is reachable
+  #     kafka-topics --bootstrap-server kafka:29092 --list
 
-      echo -e 'Successfully created the following topics:'
-      kafka-topics --bootstrap-server kafka:29092 --list
-      "
+  #     echo -e 'Creating kafka topics'
+  #     kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic order-created-topic --replication-factor 1 --partitions 3
 
-  kafdrop:
-    image: obsidiandynamics/kafdrop:latest
-    container_name: kafdrop
-    depends_on:
-      - kafka
-    ports:
-      - 9000:9000
-    environment:
-      KAFKA_BROKERCONNECT: kafka:29092
+  #     echo -e 'Successfully created the following topics:'
+  #     kafka-topics --bootstrap-server kafka:29092 --list
+  #     "
+
+  # kafdrop:
+  #   image: obsidiandynamics/kafdrop:latest
+  #   container_name: kafdrop
+  #   depends_on:
+  #     - kafka
+  #   ports:
+  #     - 9000:9000
+  #   environment:
+  #     KAFKA_BROKERCONNECT: kafka:29092

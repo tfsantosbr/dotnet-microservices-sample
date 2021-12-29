@@ -16,7 +16,14 @@ spec:
     spec:
       containers:
         - name: orders-consumer-container
-          image: orders-consumer:v2
+          image: orders-consumer:v3
           env:
             - name: KAFKA__BOOTSTRAPSERVERS
               value: kafka.default.svc.cluster.local:9092
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /healthy
+            initialDelaySeconds: 10
+            periodSeconds: 5
