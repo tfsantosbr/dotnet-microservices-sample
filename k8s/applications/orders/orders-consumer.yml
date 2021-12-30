@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: orders-consumer-container
-          image: orders-consumer:v4
+          image: orders-consumer:v5
           env:
             - name: KAFKA__BOOTSTRAPSERVERS
               value: kafka.default.svc.cluster.local:9092

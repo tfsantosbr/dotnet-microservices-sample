@@ -47,7 +47,7 @@ public class Worker : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var orderStransaction = _tracer.StartTransaction("Order Process", "Order Transaction");
+                var orderStransaction = _tracer.StartTransaction("Order Process", ApiConstants.ActionExec);
 
                 try
                 {
