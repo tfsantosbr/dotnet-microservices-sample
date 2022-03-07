@@ -2,72 +2,72 @@ version: '3'
 services:
   # MICROSERVICES
 
-  # basket-api:
-  #   container_name: basket-api
-  #   image: basket-api
-  #   build:
-  #     context: src/baskets/Basket.Api
-  #   ports:
-  #     - 8081:80
-  #   depends_on:
-  #     - redis
-  #     - elasticsearch
-  #     - apm-server
+  basket-api:
+    container_name: basket-api
+    image: basket-api
+    build:
+      context: src/baskets/Basket.Api
+    ports:
+      - 8081:80
+    depends_on:
+      - redis
+      - elasticsearch
+      - apm-server
 
-  # orders-api:
-  #   container_name: orders-api
-  #   image: orders-api
-  #   build:
-  #     context: src/orders/Orders.Api
-  #   environment:
-  #     - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-  #   ports:
-  #     - 8082:80
-  #   depends_on:
-  #     - mongo
-  #     - kafka-setup
-  #     - elasticsearch
-  #     - apm-server
+  orders-api:
+    container_name: orders-api
+    image: orders-api
+    build:
+      context: src/orders/Orders.Api
+    environment:
+      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
+    ports:
+      - 8082:80
+    depends_on:
+      - mongo
+      - kafka-setup
+      - elasticsearch
+      - apm-server
 
-  # orders-consumer:
-  #   container_name: orders-consumer
-  #   image: orders-consumer
-  #   build:
-  #     context: src/orders/Orders.Consumer
-  #   environment:
-  #     - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-  #   depends_on:
-  #     - mongo
-  #     - zookeeper
-  #     - kafka
-  #     - kafka-setup
-  #     - elasticsearch
-  #     - apm-server
-  #   restart: on-failure
+  orders-consumer:
+    container_name: orders-consumer
+    image: orders-consumer
+    build:
+      context: src/orders/Orders.Consumer
+    environment:
+      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
+    depends_on:
+      - mongo
+      - zookeeper
+      - kafka
+      - kafka-setup
+      - elasticsearch
+      - apm-server
+    restart: on-failure
 
-  # products-api:
-  #   container_name: products-api
-  #   image: products-api
-  #   build:
-  #     context: src/products/Products.Api
-  #   ports:
-  #     - 8083:80
-  #   depends_on:
-  #     - mssql
-  #     - elasticsearch
-  #     - apm-server
+  products-api:
+    container_name: products-api
+    image: products-api
+    build:
+      context: src/products/Products.Api
+    ports:
+      - 8083:80
+    depends_on:
+      - mssql
+      - elasticsearch
+      - apm-server
 
-  # users-idp:
-  #   container_name: users-idp
-  #   image: users-idp
-  #   build:
-  #     context: src/users/users.Idp
-  #   ports:
-  #     - 8084:80
-  #   depends_on:
-  #     - postgres
-  #     - elasticsearch
-  #     - apm-server
+  users-idp:
+    container_name: users-idp
+    image: users-idp
+    build:
+      context: src/users/users.Idp
+    ports:
+      - 8084:80
+    depends_on:
+      - postgres
+      - elasticsearch
+      - apm-server
 
   # MONITORING SERVICES
 
@@ -172,55 +172,55 @@ services:
 
   # MESSAGE BROKER
 
-  # zookeeper:
-  #   image: confluentinc/cp-zookeeper:latest
-  #   container_name: zookeeper
-  #   ports:
-  #     - 2181:2181
-  #   environment:
-  #     ZOOKEEPER_CLIENT_PORT: 2181
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
 
-  # kafka:
-  #   image: confluentinc/cp-kafka:latest
-  #   container_name: kafka
-  #   depends_on:
-  #     - zookeeper
-  #   ports:
-  #     - 9092:9092
-  #   expose:
-  #     - 29092
-  #   environment:
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #     KAFKA_MIN_INSYNC_REPLICAS: 1
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    expose:
+      - 29092
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
 
-  # kafka-setup:
-  #   image: confluentinc/cp-kafka:latest
-  #   container_name: kafka-setup
-  #   depends_on:
-  #     - kafka
-  #   entrypoint: ['/bin/sh', '-c']
-  #   command: |
-  #     "
-  #     # blocks until kafka is reachable
-  #     kafka-topics --bootstrap-server kafka:29092 --list
+  kafka-setup:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-setup
+    depends_on:
+      - kafka
+    entrypoint: ['/bin/sh', '-c']
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:29092 --list
 
-  #     echo -e 'Creating kafka topics'
-  #     kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic order-created-topic --replication-factor 1 --partitions 3
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic order-created-topic --replication-factor 1 --partitions 3
 
-  #     echo -e 'Successfully created the following topics:'
-  #     kafka-topics --bootstrap-server kafka:29092 --list
-  #     "
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka:29092 --list
+      "
 
-  # kafdrop:
-  #   image: obsidiandynamics/kafdrop:latest
-  #   container_name: kafdrop
-  #   depends_on:
-  #     - kafka
-  #   ports:
-  #     - 9000:9000
-  #   environment:
-  #     KAFKA_BROKERCONNECT: kafka:29092
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - 9000:9000
+    environment:
+      KAFKA_BROKERCONNECT: kafka:29092
