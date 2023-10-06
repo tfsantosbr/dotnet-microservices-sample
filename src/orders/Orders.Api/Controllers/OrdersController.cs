@@ -18,6 +18,8 @@ public class OrdersController : ControllerBase
         _configuration = configuration;
     }
 
+    // Public Methods
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<IActionResult> Create([FromBody] OrderModel request)
@@ -28,6 +30,8 @@ public class OrdersController : ControllerBase
 
         return Accepted();
     }
+
+    // Private Methods
 
     private string ConvertToCreateOrderToMessage(OrderModel request)
     {
