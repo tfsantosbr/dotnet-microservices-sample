@@ -23,6 +23,11 @@ metricbeat.modules:
   hosts: ["unix:///var/run/docker.sock"]
   period: 10s
   enabled: true
+- module: postgresql
+  metricsets: ["status"]
+  hosts: ["postgres://host.docker.internal:5432"]
+  username: postgres
+  password: postgres
 
 processors:
   - add_cloud_metadata: ~

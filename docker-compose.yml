@@ -101,7 +101,7 @@ services:
     container_name: metricbeat
     user: root
     volumes:
-      - ${pwd}/elastic/metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ${pwd}/elastic/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - /proc:/hostfs/proc:ro
@@ -124,6 +124,8 @@ services:
       - cluster.routing.allocation.disk.threshold_enabled=false
       - discovery.type=single-node
       - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+    # volumes:
+    #     - ${pwd}/elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     ulimits:
       memlock:
         hard: -1
@@ -144,6 +146,8 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    # volumes:
+    #   - ./elastic/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
       - 5601:5601
     healthcheck:
