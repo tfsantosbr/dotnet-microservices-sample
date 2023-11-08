@@ -20,7 +20,7 @@ public class ProductsImportController : ControllerBase
     {
         // code for consume CPU
 
-        var endTime = DateTime.UtcNow.AddMinutes(1);
+        var endTime = DateTime.UtcNow.AddSeconds(10);
 
         try
         {

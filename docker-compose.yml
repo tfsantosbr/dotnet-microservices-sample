@@ -11,8 +11,6 @@ services:
       - 8081:80
     depends_on:
       - redis
-      - elasticsearch
-      - apm-server
 
   orders-api:
     container_name: orders-api
@@ -26,8 +24,6 @@ services:
     depends_on:
       - mongo
       - kafka-setup
-      - elasticsearch
-      - apm-server
 
   orders-consumer:
     container_name: orders-consumer
@@ -41,8 +37,6 @@ services:
       - zookeeper
       - kafka
       - kafka-setup
-      - elasticsearch
-      - apm-server
     restart: on-failure
 
   products-api:
@@ -54,8 +48,6 @@ services:
       - 8083:80
     depends_on:
       - mssql
-      - elasticsearch
-      - apm-server
 
   users-idp:
     container_name: users-idp
@@ -66,94 +58,6 @@ services:
       - 8084:80
     depends_on:
       - postgres
-      - elasticsearch
-      - apm-server
-
-  # MONITORING SERVICES
-
-  apm-server:
-    container_name: apm-server
-    image: docker.elastic.co/apm/apm-server:7.16.2
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-    cap_add: ['CHOWN', 'DAC_OVERRIDE', 'SETGID', 'SETUID']
-    cap_drop: ['ALL']
-    ports:
-      - 8200:8200
-    command: >
-      apm-server -e
-        -E apm-server.rum.enabled=true
-        -E setup.kibana.host=kibana:5601
-        -E setup.template.settings.index.number_of_replicas=0
-        -E apm-server.kibana.enabled=true
-        -E apm-server.kibana.host=kibana:5601
-        -E output.elasticsearch.hosts=["elasticsearch:9200"]
-    healthcheck:
-      interval: 10s
-      retries: 12
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
-
-  metricbeat:
-    image: docker.elastic.co/beats/metricbeat:7.16.2
-    container_name: metricbeat
-    user: root
-    volumes:
-      - ${pwd}/elastic/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /proc:/hostfs/proc:ro
-      - /:/hostfs:ro
-    environment:
-      - ELASTICSEARCH_HOST=http://elasticsearch:9200
-      - KIBANA_HOST=http://kibana:5601
-    depends_on:
-     elasticsearch:
-       condition: service_healthy
-     kibana:
-       condition: service_healthy
-
-  elasticsearch:
-    container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
-    environment:
-      - bootstrap.memory_lock=true
-      - cluster.name=docker-cluster
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
-    # volumes:
-    #     - ${pwd}/elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-    ulimits:
-      memlock:
-        hard: -1
-        soft: -1
-    ports:
-      - 9200:9200
-    healthcheck:
-      interval: 20s
-      retries: 10
-      test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
-
-  kibana:
-    container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.16.2
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    # volumes:
-    #   - ./elastic/kibana.yml:/usr/share/kibana/config/kibana.yml
-    ports:
-      - 5601:5601
-    healthcheck:
-      interval: 10s
-      retries: 20
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status
 
   # DATABASES
 

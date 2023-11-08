@@ -9,6 +9,7 @@ using Orders.Consumer.Configurations.HealthCheck;
 using Orders.Consumer.Configurations.HealthCheck.Publishers;
 using Orders.Consumer.Repositories;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 
 var host = Host.CreateDefaultBuilder(args)
@@ -41,16 +42,16 @@ var host = Host.CreateDefaultBuilder(args)
 
         var elasticsearchSinkOptions = new ElasticsearchSinkOptions(new Uri(configuration["Elasticsearch:Uri"]))
         {
-            IndexFormat = configuration["Elasticsearch:LogsSettings:IndexFormat"]
+            IndexFormat = configuration["Elasticsearch:IndexFormat"]
         };
 
         provider
+            .MinimumLevel.Override("Elastic.Apm", LogEventLevel.Fatal)
             .Enrich.WithElasticApmCorrelationInfo()
             .Enrich.WithCorrelationId()
             .Enrich.WithMachineName()
             .Enrich.WithClientIp()
             .Enrich.WithClientAgent()
-            .Enrich.WithProperty("AppName", configuration["Elasticsearch:LogsSettings:AppName"])
             .WriteTo.Console()
             .WriteTo.Elasticsearch(elasticsearchSinkOptions);
     })

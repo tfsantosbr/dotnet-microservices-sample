@@ -8,18 +8,22 @@ namespace Eventflix.Api.Extensions.Configurations
     {
         public static ConfigureHostBuilder AddLogs(this ConfigureHostBuilder host, IConfiguration configuration)
         {
-            var elasticsearchSinkOptions = new ElasticsearchSinkOptions(new Uri(configuration["Elasticsearch:Uri"]))
+            var url = configuration["Elasticsearch:Uri"];
+            var indexFormat = configuration["Elasticsearch:IndexFormat"];
+
+            var elasticsearchSinkOptions = new ElasticsearchSinkOptions(new Uri(url))
             {
-                IndexFormat = configuration["Elasticsearch:LogsSettings:IndexFormat"]
+                AutoRegisterTemplate = true,
+                IndexFormat = indexFormat,
             };
 
             host.UseSerilog((context, provider) => provider
+                .MinimumLevel.Override("Elastic.Apm", LogEventLevel.Fatal)
                 .Enrich.WithElasticApmCorrelationInfo()
                 .Enrich.WithCorrelationId()
                 .Enrich.WithMachineName()
                 .Enrich.WithClientIp()
                 .Enrich.WithClientAgent()
-                .Enrich.WithProperty("AppName", configuration["Elasticsearch:LogsSettings:AppName"])
                 .WriteTo.Console()
                 .WriteTo.Elasticsearch(elasticsearchSinkOptions));
 

@@ -1,5 +1,6 @@
 using Elastic.Apm.SerilogEnricher;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 
 namespace Eventflix.Api.Extensions.Configurations
@@ -18,13 +19,15 @@ namespace Eventflix.Api.Extensions.Configurations
             };
 
             host.UseSerilog((context, provider) => provider
+                .MinimumLevel.Override("Elastic.Apm", LogEventLevel.Fatal)
                 .Enrich.WithElasticApmCorrelationInfo()
                 .Enrich.WithCorrelationId()
                 .Enrich.WithMachineName()
                 .Enrich.WithClientIp()
                 .Enrich.WithClientAgent()
                 .WriteTo.Console()
-                .WriteTo.Elasticsearch(elasticsearchSinkOptions));
+                .WriteTo.Elasticsearch(elasticsearchSinkOptions)
+                );
 
             return host;
         }
