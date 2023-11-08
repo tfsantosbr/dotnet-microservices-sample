@@ -31,9 +31,6 @@ namespace Orders.Consumer.Configurations.HealthCheck.Publishers
 
             _prevStatus = report.Status;
 
-            _logger.LogInformation("{Timestamp} Health Check Status: {Result}",
-                    DateTime.UtcNow, report.Status);
-
             cancellationToken.ThrowIfCancellationRequested();
 
             return Task.CompletedTask;
