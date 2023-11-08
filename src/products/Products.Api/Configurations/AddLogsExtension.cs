@@ -1,5 +1,6 @@
 using Elastic.Apm.SerilogEnricher;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 
 namespace Eventflix.Api.Extensions.Configurations
