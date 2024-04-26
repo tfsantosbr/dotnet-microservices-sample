@@ -4,6 +4,10 @@ using Basket.Api.Models.Validators;
 using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +16,34 @@ var configuration = builder.Configuration;
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Open Telemetry =========================================================================================
+
+const string serviceName = "basket-api";
+
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+        .AddConsoleExporter();
+});
+
+builder.Services.AddOpenTelemetry()
+      .ConfigureResource(resource => resource.AddService(serviceName))
+      .WithTracing(tracing => tracing
+          .AddAspNetCoreInstrumentation()
+          .AddHttpClientInstrumentation()
+          .AddRedisInstrumentation()
+          .AddConsoleExporter())
+      .WithMetrics(metrics => metrics
+          .AddAspNetCoreInstrumentation()
+          .AddRuntimeInstrumentation()
+          .AddHttpClientInstrumentation()
+          .AddConsoleExporter()
+          .AddPrometheusExporter(options => 
+            options.DisableTotalNameSuffixForCounters = true)
+        );
+
+// =======================================================================================================
 
 // add validations
 builder.Services.AddFluentValidation();
@@ -46,5 +78,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.Run();
