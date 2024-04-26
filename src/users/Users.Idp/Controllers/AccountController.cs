@@ -30,6 +30,20 @@ public class AccountController : ControllerBase
         return Created($"account/{user.Id}", user);
     }
 
+    [HttpGet("{userId}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public IActionResult GetUser(Guid userId)
+    {
+        var fakeUser = new 
+        {
+            Id = userId,
+            Name = Faker.Name.FullName(),
+            Email = Faker.Internet.Email()
+        };
+
+        return Ok(fakeUser);
+    }
+
     [HttpDelete("{userId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult Delete(Guid userId)

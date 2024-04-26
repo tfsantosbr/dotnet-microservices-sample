@@ -12,11 +12,14 @@ public class BasketsController : ControllerBase
 {
     private readonly ILogger<BasketsController> _logger;
     private readonly IConnectionMultiplexer _redis;
+    private readonly IConfiguration _configuration;
 
-    public BasketsController(ILogger<BasketsController> logger, IConnectionMultiplexer redis)
+    public BasketsController(
+        ILogger<BasketsController> logger, IConnectionMultiplexer redis, IConfiguration configuration)
     {
         _logger = logger;
         _redis = redis;
+        _configuration = configuration;
     }
 
     // Public Methods
@@ -25,9 +28,11 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
-        var userId = request.UserId;
+        request.User = await GetUserDetails(request.UserId);
 
-        var existingBasket = await GetBasket(userId);
+        if(request.User == null) return NotFound("User not found");
+
+        var existingBasket = await GetBasket(request.User.Id);
 
         if (existingBasket != null)
         {
@@ -40,6 +45,21 @@ public class BasketsController : ControllerBase
 
         return Ok(request);
     }
+
+    private async Task<UserModel?> GetUserDetails(Guid? userId)
+    {
+        var client = new HttpClient();
+        var endpoint = _configuration["UsersApiEndpoint"];
+        var response = await client.GetAsync($"{endpoint}/{userId}");
+
+        if (!response.IsSuccessStatusCode) return null;
+
+        var userString = await response.Content.ReadAsStringAsync();
+
+        return JsonSerializer.Deserialize<UserModel>(userString);
+    }
+
+
 
     [HttpGet("{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
