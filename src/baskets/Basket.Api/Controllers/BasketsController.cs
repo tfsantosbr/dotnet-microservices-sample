@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Basket.Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
 
 namespace Basket.Api.Controllers;

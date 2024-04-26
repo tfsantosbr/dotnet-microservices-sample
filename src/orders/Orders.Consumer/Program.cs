@@ -1,16 +1,9 @@
 using Confluent.Kafka;
-using Elastic.Apm.Extensions.Hosting;
-using Elastic.Apm.MongoDb;
-using Elastic.Apm.SerilogEnricher;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Orders.Consumer;
-using Orders.Consumer.Configurations.HealthCheck;
+using Orders.Consumer.Configurations;
 using Orders.Consumer.Configurations.HealthCheck.Publishers;
 using Orders.Consumer.Repositories;
-using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.Elasticsearch;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -36,26 +29,7 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddHostedService<Worker>();
     })
-    .UseSerilog((context, provider) =>
-    {
-        var configuration = context.Configuration;
-
-        var elasticsearchSinkOptions = new ElasticsearchSinkOptions(new Uri(configuration["Elasticsearch:Uri"]))
-        {
-            IndexFormat = configuration["Elasticsearch:IndexFormat"]
-        };
-
-        provider
-            .MinimumLevel.Override("Elastic.Apm", LogEventLevel.Fatal)
-            .Enrich.WithElasticApmCorrelationInfo()
-            .Enrich.WithCorrelationId()
-            .Enrich.WithMachineName()
-            .Enrich.WithClientIp()
-            .Enrich.WithClientAgent()
-            .WriteTo.Console()
-            .WriteTo.Elasticsearch(elasticsearchSinkOptions);
-    })
-    .UseElasticApm(new MongoDbDiagnosticsSubscriber())
+    .AddLogs()
     .Build();
 
 await host.RunAsync();

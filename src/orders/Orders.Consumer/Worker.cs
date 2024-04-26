@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Confluent.Kafka;
-using Elastic.Apm.Api;
 using Orders.Consumer.Models;
 using Orders.Consumer.Repositories;
 
@@ -11,14 +10,12 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _configuration;
     private readonly OrderRepository _repository;
-    private readonly ITracer _tracer;
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration, OrderRepository repository, ITracer tracer)
+    public Worker(ILogger<Worker> logger, IConfiguration configuration, OrderRepository repository)
     {
         _logger = logger;
         _configuration = configuration;
         _repository = repository;
-        _tracer = tracer;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,7 +44,7 @@ public class Worker : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var orderStransaction = _tracer.StartTransaction("Order Process", ApiConstants.ActionExec);
+                // TODO: trace order process
 
                 try
                 {
@@ -72,18 +69,18 @@ public class Worker : BackgroundService
                 catch (InvalidOperationException exception)
                 {
                     _logger.LogError($"An error ocurred while processing order: {exception.Message}", exception);
-                    orderStransaction.CaptureException(exception);
+                    // TODO: capture exception with tracer
                 }
                 catch (ConsumeException exception)
                 {
                     _logger.LogError($"An error ocurred while consuming topic: {topic}", exception);
-                    orderStransaction.CaptureException(exception);
+                    // TODO: capture exception with tracer
 
-                    throw exception;
+                    throw;
                 }
                 finally
                 {
-                    orderStransaction.End();
+                    // TODO: stop tracing order process
                 }
             }
         }

@@ -1,8 +1,6 @@
 using Basket.Api.Configurations.HealthCheck;
 using Basket.Api.Models;
 using Basket.Api.Models.Validators;
-using Elastic.Apm.NetCoreAll;
-using Elastic.Apm.StackExchange.Redis;
 using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -22,7 +20,6 @@ builder.Services.AddTransient<IValidator<BasketProductItemModel>, BasketProductI
 
 // add redis
 var multiplexer = ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis"));
-multiplexer.UseElasticApm();
 builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 
 // add health check
@@ -32,7 +29,6 @@ builder.Services.AddHealthChecks()
 
 // add logs
 builder.Host.AddLogs(builder.Configuration);
-builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
 

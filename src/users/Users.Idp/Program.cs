@@ -1,4 +1,3 @@
-using Elastic.Apm.NetCoreAll;
 using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -31,7 +30,6 @@ builder.Services.AddDbContext<UsersDbContext>(options =>
 
 // Add Logs
 builder.Host.AddLogs(configuration);
-builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
 

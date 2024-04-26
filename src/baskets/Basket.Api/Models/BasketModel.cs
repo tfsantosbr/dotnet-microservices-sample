@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using FluentValidation;
-
 namespace Basket.Api.Models
 {
     public class BasketModel

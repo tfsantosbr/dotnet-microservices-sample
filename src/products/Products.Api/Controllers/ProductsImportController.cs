@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Products.Api.Controllers;
@@ -20,7 +19,7 @@ public class ProductsImportController : ControllerBase
     {
         // code for consume CPU
 
-        var endTime = DateTime.UtcNow.AddSeconds(10);
+        var endTime = DateTime.UtcNow.AddSeconds(3);
 
         try
         {

@@ -1,5 +1,4 @@
 using Confluent.Kafka;
-using Elastic.Apm.NetCoreAll;
 using Eventflix.Api.Extensions.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +15,6 @@ builder.Services.AddHealthChecks()
 
 // Add Logs
 builder.Host.AddLogs(builder.Configuration);
-builder.Host.UseAllElasticApm();
 
 var app = builder.Build();
 

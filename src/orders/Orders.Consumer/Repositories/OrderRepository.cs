@@ -1,5 +1,3 @@
-using Elastic.Apm.Api;
-using Elastic.Apm.MongoDb;
 using MongoDB.Driver;
 using Orders.Consumer.Models;
 
@@ -9,11 +7,10 @@ namespace Orders.Consumer.Repositories
     {
         private readonly IMongoCollection<Order> _booksCollection;
 
-        public OrderRepository(IConfiguration configuration, ITracer tracer)
+        public OrderRepository(IConfiguration configuration)
         {
             var mongoConnectionString = configuration.GetSection("OrdersDatabase:ConnectionString").Value;
             var mongoSettings = MongoClientSettings.FromConnectionString(mongoConnectionString);
-            mongoSettings.ClusterConfigurator = builder => builder.Subscribe(new MongoDbEventSubscriber());
 
             var mongoClient = new MongoClient(mongoSettings);
 
