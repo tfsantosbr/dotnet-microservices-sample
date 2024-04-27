@@ -54,16 +54,6 @@ services:
     networks:
       - microservices
 
-  prometheus:
-    image: prom/prometheus
-    container_name: ms-prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - 9090:9090
-    networks:
-      - microservices
-
 networks:
   microservices:
     driver: bridge

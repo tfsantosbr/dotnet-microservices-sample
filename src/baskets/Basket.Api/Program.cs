@@ -19,29 +19,47 @@ builder.Services.AddSwaggerGen();
 
 // Open Telemetry =========================================================================================
 
-const string serviceName = "basket-api";
 
-builder.Logging.AddOpenTelemetry(options =>
-{
-    options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-        .AddConsoleExporter();
-});
+//const string serviceName = "basket-api";
+
+// builder.Logging.AddOpenTelemetry(options =>
+// {
+//     options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+//         .AddConsoleExporter();
+// });
+
+// builder.Services.AddOpenTelemetry()
+//       .ConfigureResource(resource => resource.AddService(serviceName))
+//       .WithTracing(tracing => tracing
+//           .AddAspNetCoreInstrumentation()
+//           .AddHttpClientInstrumentation()
+//           .AddRedisInstrumentation()
+//           .AddConsoleExporter())
+//       .WithMetrics(metrics => metrics
+//           .AddAspNetCoreInstrumentation()
+//           .AddRuntimeInstrumentation()
+//           .AddHttpClientInstrumentation()
+//           .AddConsoleExporter()
+//           .AddPrometheusExporter(options => 
+//             options.DisableTotalNameSuffixForCounters = true)
+//         );
 
 builder.Services.AddOpenTelemetry()
-      .ConfigureResource(resource => resource.AddService(serviceName))
-      .WithTracing(tracing => tracing
-          .AddAspNetCoreInstrumentation()
-          .AddHttpClientInstrumentation()
-          .AddRedisInstrumentation()
-          .AddConsoleExporter())
-      .WithMetrics(metrics => metrics
-          .AddAspNetCoreInstrumentation()
-          .AddRuntimeInstrumentation()
-          .AddHttpClientInstrumentation()
-          .AddConsoleExporter()
-          .AddPrometheusExporter(options => 
-            options.DisableTotalNameSuffixForCounters = true)
-        );
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter()
+    )
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter()
+    );
+
+builder.Logging.AddOpenTelemetry(logging => logging
+        .AddOtlpExporter()
+    );
 
 // =======================================================================================================
 
@@ -78,7 +96,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.Run();
