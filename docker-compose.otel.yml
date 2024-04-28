@@ -48,7 +48,6 @@ services:
       - "3100:3100"
     volumes:
       - ./config/loki-config.yaml:/etc/loki/loki-config.yaml
-      - loki-data:/data
     networks:
       - microservices
 
@@ -65,8 +64,6 @@ services:
       - microservices
 
 volumes:
-  loki-data:
-    name: ms-loki-data
   grafana-data:
     name: ms-grafana-data
 
