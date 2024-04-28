@@ -13,20 +13,26 @@ exporters:
     endpoint: 0.0.0.0:8889
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
 
 processors:
   batch:
 
 extensions:
   health_check:
+  pprof:
+  zpages:
 
 service:
-  extensions: [health_check]
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlp]
     metrics:
       receivers: [otlp]
       processors: [batch]

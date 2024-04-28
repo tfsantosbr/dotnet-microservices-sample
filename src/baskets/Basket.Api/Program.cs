@@ -22,14 +22,18 @@ builder.Services.AddSwaggerGen();
 const string serviceName = "basket-api";
 
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => resource.AddService(serviceName) )
+    .ConfigureResource(resource => resource.AddService(serviceName))
     .WithTracing(tracing => tracing
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRedisInstrumentation()
-        .AddOtlpExporter()
+        .AddOtlpExporter(options => 
+            options.Endpoint = new Uri("http://otel-collector:4317")
+        )
     )
     .WithMetrics(metrics => metrics
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
         .AddHttpClientInstrumentation()
