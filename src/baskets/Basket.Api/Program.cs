@@ -19,46 +19,31 @@ builder.Services.AddSwaggerGen();
 
 // Open Telemetry =========================================================================================
 
-
-//const string serviceName = "basket-api";
-
-// builder.Logging.AddOpenTelemetry(options =>
-// {
-//     options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-//         .AddConsoleExporter();
-// });
-
-// builder.Services.AddOpenTelemetry()
-//       .ConfigureResource(resource => resource.AddService(serviceName))
-//       .WithTracing(tracing => tracing
-//           .AddAspNetCoreInstrumentation()
-//           .AddHttpClientInstrumentation()
-//           .AddRedisInstrumentation()
-//           .AddConsoleExporter())
-//       .WithMetrics(metrics => metrics
-//           .AddAspNetCoreInstrumentation()
-//           .AddRuntimeInstrumentation()
-//           .AddHttpClientInstrumentation()
-//           .AddConsoleExporter()
-//           .AddPrometheusExporter(options => 
-//             options.DisableTotalNameSuffixForCounters = true)
-//         );
+const string serviceName = "basket-api";
 
 builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName) )
     .WithTracing(tracing => tracing
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
+        .AddRedisInstrumentation()
         .AddOtlpExporter()
     )
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddOtlpExporter()
+        .AddProcessInstrumentation()
+        .AddOtlpExporter(options => 
+            options.Endpoint = new Uri("http://otel-collector:4317")
+        )
     );
 
 builder.Logging.AddOpenTelemetry(logging => logging
-        .AddOtlpExporter()
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+        .AddOtlpExporter(options => 
+            options.Endpoint = new Uri("http://otel-collector:4317")
+        )
     );
 
 // =======================================================================================================

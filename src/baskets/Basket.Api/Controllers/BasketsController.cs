@@ -27,6 +27,8 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
+        _logger.LogInformation("ACCESS: CreateOrUpdate in Basket API");
+        
         request.User = await GetUserDetails(request.UserId);
 
         if(request.User == null) return NotFound("User not found");

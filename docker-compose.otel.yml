@@ -19,7 +19,6 @@ services:
     container_name: ms-prometheus
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
     ports:
       - 9090:9090
     networks:
@@ -38,10 +37,21 @@ services:
       - 3000:3000
     networks:
       - microservices
+  
+  loki:
+    image: grafana/loki:latest
+    container_name: ms-grafana-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki-data:/data
+    networks:
+      - microservices
 
 volumes:
-  prometheus-data:
-    name: ms-prometheus-data
+  loki-data:
+    name: ms-loki-data
   grafana-data:
     name: ms-grafana-data
 
