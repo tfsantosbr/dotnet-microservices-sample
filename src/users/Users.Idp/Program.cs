@@ -70,7 +70,7 @@ builder.Services.AddHealthChecks()
 
 // add context
 builder.Services.AddDbContext<UsersDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("Postgres"))
+    options.UseNpgsql(configuration.GetConnectionString("Postgres")!)
     );
 
 // Add Logs
