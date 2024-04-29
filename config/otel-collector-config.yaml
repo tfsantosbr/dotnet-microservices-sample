@@ -10,7 +10,9 @@ exporters:
   debug:
     verbosity: detailed
   otlp/elastic: 
-    endpoint: "http://apm-server:8200"  
+    endpoint: "http://apm-server:8200"
+    tls:
+      insecure: true
 
 processors:
   batch:
@@ -30,8 +32,8 @@ service:
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlp/elastic]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlp/elastic]
