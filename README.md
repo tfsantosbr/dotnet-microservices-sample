@@ -10,7 +10,9 @@
 
 ## Open Solutions
 
-[x] Prometheus (Metrics)
-[ ] Seq (Logs)
-[ ] Jarger (Tracing)
-[ ] Zipkin (Tracing)
+| Tool                  | URL                       |
+| ----------------------| ------------------------- |
+| Prometheus (Metrics)  | http://localhost:3000     |
+| Seq (Logs)            | http://localhost:5000     |
+| Jarger (Tracing)      | http://localhost:16686    |
+| Zipkin (Tracing)      | http://localhost:9411     |
