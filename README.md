@@ -8,11 +8,9 @@
 | Kafka         | http://host.docker.internal:9092  |
 | kafkadrop     | http://host.docker.internal:9000  |
 
-## Open Solutions
 
-| Tool                  | URL                       |
-| ----------------------| ------------------------- |
-| Prometheus (Metrics)  | http://localhost:3000     |
-| Seq (Logs)            | http://localhost:5000     |
-| Jarger (Tracing)      | http://localhost:16686    |
-| Zipkin (Tracing)      | http://localhost:9411     |
+Kibana -> http://localhost:5601
+
+curl -L -O https://raw.githubusercontent.com/elastic/apm-server/8.13/apm-server.docker.yml
+
+docker run -d -p 8200:8200 --name=apm-server --user=apm-server --volume="${PWD}/apm-server.docker.yml:/usr/share/apm-server/apm-server.yml:ro" docker.elastic.co/apm/apm-server:8.13.2 --strict.perms=false -e -E output.elasticsearch.hosts=["elasticsearch:9200"]
