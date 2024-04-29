@@ -27,7 +27,7 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
-        _logger.LogInformation("ACCESS: CreateOrUpdate in Basket API");
+        _logger.LogInformation("Create or update user basket: {Request}", JsonSerializer.Serialize(request));
         
         request.User = await GetUserDetails(request.UserId);
 
@@ -47,25 +47,12 @@ public class BasketsController : ControllerBase
         return Ok(request);
     }
 
-    private async Task<UserModel?> GetUserDetails(Guid? userId)
-    {
-        var client = new HttpClient();
-        var endpoint = _configuration["UsersApiEndpoint"];
-        var response = await client.GetAsync($"{endpoint}/{userId}");
-
-        if (!response.IsSuccessStatusCode) return null;
-
-        var userString = await response.Content.ReadAsStringAsync();
-
-        return JsonSerializer.Deserialize<UserModel>(userString);
-    }
-
-
-
     [HttpGet("{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(Guid userId)
     {
+        _logger.LogInformation("Getting user basket {UserId}", userId);
+
         var basket = await GetBasket(userId);
 
         if (basket == null)
@@ -78,12 +65,27 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(Guid userId)
     {
+        _logger.LogInformation("Deleting user basket {UserId}", userId);
+
         await RemoveBasket(userId);
 
         return NoContent();
     }
 
     // Private methods
+
+    private async Task<UserModel?> GetUserDetails(Guid? userId)
+    {
+        var client = new HttpClient();
+        var endpoint = _configuration["UsersApiEndpoint"];
+        var response = await client.GetAsync($"{endpoint}/{userId}");
+
+        if (!response.IsSuccessStatusCode) return null;
+
+        var userString = await response.Content.ReadAsStringAsync();
+
+        return JsonSerializer.Deserialize<UserModel>(userString);
+    }
 
     private async Task RemoveBasket(Guid userId)
     {
