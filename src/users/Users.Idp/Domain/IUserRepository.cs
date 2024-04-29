@@ -1,6 +1,6 @@
 namespace Users.Idp.Domain;
 
-public interface IUserService
+public interface IUserRepository
 {
     Task<User> GetUserAsync(Guid id);
 }
