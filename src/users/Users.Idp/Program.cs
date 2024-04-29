@@ -2,7 +2,9 @@ using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Users.Idp.Domain;
 using Users.Idp.Infrastructure.Context;
+using Users.Idp.Infrastructure.Repositories;
 using Users.Idp.Models;
 using Users.Idp.Models.Validators;
 
@@ -17,6 +19,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddFluentValidation();
 builder.Services.AddTransient<IValidator<CreateAccount>, CreateAccountValidator>();
 builder.Services.AddTransient<IValidator<SignIn>, SignInValidator>();
+
+// Add services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // add health check
 builder.Services.AddHealthChecks()

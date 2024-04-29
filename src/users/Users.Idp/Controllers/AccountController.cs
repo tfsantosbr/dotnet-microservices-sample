@@ -10,12 +10,14 @@ namespace Users.Idp.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly ILogger<AccountController> _logger;
+    private readonly IUserService _userService;
     private readonly UsersDbContext _context;
 
-    public AccountController(ILogger<AccountController> logger, UsersDbContext context)
+    public AccountController(ILogger<AccountController> logger, UsersDbContext context, IUserService userService)
     {
         _logger = logger;
         _context = context;
+        _userService = userService;
     }
 
     [HttpPost]
@@ -32,14 +34,9 @@ public class AccountController : ControllerBase
 
     [HttpGet("{userId}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public IActionResult GetUser(Guid userId)
+    public async Task<IActionResult> GetUser(Guid userId)
     {
-        var fakeUser = new 
-        {
-            Id = userId,
-            Name = Faker.Name.FullName(),
-            Email = Faker.Internet.Email()
-        };
+        var fakeUser = await _userService.GetUserAsync(userId);
 
         return Ok(fakeUser);
     }
