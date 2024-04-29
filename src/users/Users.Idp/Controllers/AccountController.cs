@@ -38,7 +38,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> GetUser(Guid userId)
     {
-        _logger.LogInformation("Getting user {UserId}", userId);
+        _logger.LogInformation("3. CONTROLLER: GetUser: {userId}", userId);
 
         var fakeUser = await _userService.GetUserAsync(userId);
 

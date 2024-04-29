@@ -27,7 +27,7 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
-        _logger.LogInformation("Create or update user basket: {Request}", JsonSerializer.Serialize(request));
+        _logger.LogInformation("1. CONTROLLER: CreateOrUpdate: {Request}", JsonSerializer.Serialize(request));
         
         request.User = await GetUserDetails(request.UserId);
 
@@ -76,6 +76,8 @@ public class BasketsController : ControllerBase
 
     private async Task<UserModel?> GetUserDetails(Guid? userId)
     {
+        _logger.LogInformation("2. PRIVATE METHOD: GetUserDetails: {userId}", userId);
+
         var client = new HttpClient();
         var endpoint = _configuration["UsersApiEndpoint"];
         var response = await client.GetAsync($"{endpoint}/{userId}");
