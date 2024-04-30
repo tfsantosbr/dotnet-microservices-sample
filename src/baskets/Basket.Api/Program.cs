@@ -8,7 +8,15 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Events;
+using Serilog.Exceptions;
+using Serilog.Formatting.Compact;
+using Serilog.Formatting.Json;
+using Serilog.Sinks.OpenTelemetry;
+using Serilog.Sinks.SystemConsole.Themes;
 using StackExchange.Redis;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -17,7 +25,41 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Open Telemetry =========================================================================================
+// SERILOG ================================================================================================
+
+builder.Services.AddSerilog((services, logger) => logger
+    .ReadFrom.Configuration(configuration)
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithThreadId()
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentUserName()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
+    .Enrich.WithProcessId()
+    .Enrich.WithProcessName()
+    .Enrich.WithExceptionDetails()
+    .Enrich.WithClientIp()
+    .Enrich.WithCorrelationId()
+    .WriteTo.File(formatter: new JsonFormatter(), "log.json")
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = "http://host.docker.internal:4317";
+        options.ResourceAttributes = new Dictionary<string, object>
+        {
+            ["service.name"] = "basket-api",
+            ["index"] = 10,
+            ["flag"] = true,
+            ["value"] = 3.14
+        };
+    })
+);
+
+// ========================================================================================================
+
+// OPEN TELEMETRY =========================================================================================
 
 const string serviceName = "basket-api";
 
@@ -28,7 +70,7 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRedisInstrumentation()
-        .AddOtlpExporter(options => 
+        .AddOtlpExporter(options =>
             options.Endpoint = new Uri("http://otel-collector:4317")
         )
     )
@@ -38,17 +80,17 @@ builder.Services.AddOpenTelemetry()
         .AddRuntimeInstrumentation()
         .AddHttpClientInstrumentation()
         .AddProcessInstrumentation()
-        .AddOtlpExporter(options => 
+        .AddOtlpExporter(options =>
             options.Endpoint = new Uri("http://otel-collector:4317")
         )
     );
 
-builder.Logging.AddOpenTelemetry(logging => logging
-        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-        .AddOtlpExporter(options => 
-            options.Endpoint = new Uri("http://otel-collector:4317")
-        )
-    );
+// builder.Logging.AddOpenTelemetry(logging => logging
+//         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+//         .AddOtlpExporter(options =>
+//             options.Endpoint = new Uri("http://otel-collector:4317")
+//         )
+//     );
 
 // =======================================================================================================
 
@@ -70,6 +112,10 @@ builder.Services.AddHealthChecks()
 builder.Host.AddLogs(builder.Configuration);
 
 var app = builder.Build();
+
+// SERILOG ================================================================================================
+app.UseSerilogRequestLogging();
+// ========================================================================================================
 
 // map health check
 app.MapHealthChecks("/healthz");

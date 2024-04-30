@@ -27,11 +27,11 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
-        _logger.LogInformation("1. CONTROLLER: CreateOrUpdate: {Request}", JsonSerializer.Serialize(request));
-        
+        _logger.LogInformation("1. CONTROLLER: CreateOrUpdate {@request}", request);
+
         request.User = await GetUserDetails(request.UserId);
 
-        if(request.User == null) return NotFound("User not found");
+        if (request.User == null) return NotFound("User not found");
 
         var existingBasket = await GetBasket(request.User.Id);
 

@@ -42,7 +42,7 @@ services:
       - microservices
   
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:main
     container_name: ms-loki
     ports:
       - "3100:3100"
