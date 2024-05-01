@@ -15,6 +15,12 @@ public class UserRepository : IUserRepository
     {
         _logger.LogInformation("5. USER REPOSITORY: GetUserAsync: {userId}", userId);
 
+        // if (userId == new Guid("37a528bd-7828-4636-89f2-42971e8fc568"))
+        // {
+            throw new ApplicationException($"CUSTOM ERROR: An error occurred when trying " + 
+                $"to search for the user with the id '{userId}'.");
+        // }
+
         // var random = new Random();
         // int randomNumber = random.Next(100);
 

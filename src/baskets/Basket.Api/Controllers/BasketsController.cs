@@ -12,13 +12,18 @@ public class BasketsController : ControllerBase
     private readonly ILogger<BasketsController> _logger;
     private readonly IConnectionMultiplexer _redis;
     private readonly IConfiguration _configuration;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public BasketsController(
-        ILogger<BasketsController> logger, IConnectionMultiplexer redis, IConfiguration configuration)
+        ILogger<BasketsController> logger,
+        IConnectionMultiplexer redis,
+        IConfiguration configuration,
+        IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
         _redis = redis;
         _configuration = configuration;
+        _httpClientFactory = httpClientFactory;
     }
 
     // Public Methods
@@ -42,7 +47,10 @@ public class BasketsController : ControllerBase
         }
 
         var newBasket = request;
+
         await SaveBasket(newBasket);
+
+        _logger.LogInformation("6. CONTROLLER: Basket created or updated {@request}", request);
 
         return Ok(request);
     }
@@ -78,11 +86,12 @@ public class BasketsController : ControllerBase
     {
         _logger.LogInformation("2. PRIVATE METHOD: GetUserDetails: {userId}", userId);
 
-        var client = new HttpClient();
-        var endpoint = _configuration["UsersApiEndpoint"];
-        var response = await client.GetAsync($"{endpoint}/{userId}");
+        var client = _httpClientFactory.CreateClient();
+        client.BaseAddress = new Uri(_configuration["UsersApiEndpoint"]!);
+        
+        var response = await client.GetAsync($"account/{userId}");
 
-        if (!response.IsSuccessStatusCode) return null;
+        response.EnsureSuccessStatusCode();
 
         var userString = await response.Content.ReadAsStringAsync();
 

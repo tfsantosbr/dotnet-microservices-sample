@@ -30,7 +30,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSerilog((services, logger) => logger
     .ReadFrom.Configuration(configuration)
     .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    //.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .Enrich.WithThreadId()
     .Enrich.WithMachineName()
@@ -49,10 +49,7 @@ builder.Services.AddSerilog((services, logger) => logger
         options.Endpoint = "http://host.docker.internal:4317";
         options.ResourceAttributes = new Dictionary<string, object>
         {
-            ["service.name"] = "basket-api",
-            ["index"] = 10,
-            ["flag"] = true,
-            ["value"] = 3.14
+            ["service.name"] = "basket-api"
         };
     })
 );
@@ -107,6 +104,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddHealthChecks()
     .AddCheck<RedisHealthCheck>("redis-health-check")
     ;
+
+// add http
+builder.Services.AddHttpClient();
 
 // add logs
 builder.Host.AddLogs(builder.Configuration);
