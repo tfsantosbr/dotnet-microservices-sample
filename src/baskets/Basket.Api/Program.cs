@@ -30,7 +30,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSerilog((services, logger) => logger
     .ReadFrom.Configuration(configuration)
     .MinimumLevel.Information()
-    //.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .Enrich.WithThreadId()
     .Enrich.WithMachineName()

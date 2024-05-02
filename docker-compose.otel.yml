@@ -62,6 +62,17 @@ services:
       - "4317"  # otlp grpc
     networks:
       - microservices
+  
+  influxdb:
+    image: influxdb:1.8
+    container_name: ms-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+    networks:
+      - microservices
+      - k6
 
 volumes:
   grafana-data:
@@ -69,4 +80,4 @@ volumes:
 
 networks:
   microservices:
-    driver: bridge
+  k6:

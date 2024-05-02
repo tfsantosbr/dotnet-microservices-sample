@@ -31,9 +31,34 @@ public class OrdersController : ControllerBase
         return Accepted();
     }
 
+    [HttpPut("{orderId}/confirm")]
+    public IActionResult ConfirmOrder(Guid orderId)
+    {
+        var order = GetOrder(orderId);
+        
+        order.Confirm();
+
+        return Ok(order);
+    }
+
+    private static OrderModel GetOrder(Guid orderId)
+    {
+        var random = new Random();
+        var randomDate = random.Next(1, 7);
+
+        OrderModel order = new()
+        {
+            OrderId = orderId,
+            UserId = Guid.NewGuid(),
+            CreatedAt = DateTime.Now.AddDays(-randomDate),
+        };
+
+        return order;
+    }
+
     // Private Methods
 
-    private string ConvertToCreateOrderToMessage(OrderModel request)
+    private static string ConvertToCreateOrderToMessage(OrderModel request)
     {
         return JsonSerializer.Serialize(request);
     }
