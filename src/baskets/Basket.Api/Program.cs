@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
 using Basket.Api.Configurations.HealthCheck;
+using Basket.Api.Metrics;
 using Basket.Api.Models;
 using Basket.Api.Models.Validators;
 using Eventflix.Api.Extensions.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -11,10 +14,7 @@ using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
-using Serilog.Formatting.Compact;
 using Serilog.Formatting.Json;
-using Serilog.Sinks.OpenTelemetry;
-using Serilog.Sinks.SystemConsole.Themes;
 using StackExchange.Redis;
 
 
@@ -24,6 +24,9 @@ var configuration = builder.Configuration;
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<JsonOptions>(options =>
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
+);
 
 // SERILOG ================================================================================================
 
@@ -60,9 +63,14 @@ builder.Services.AddSerilog((services, logger) => logger
 
 const string serviceName = "basket-api";
 
+// Metrics Class
+
+builder.Services.AddSingleton<BasketMetrics>();
+
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource.AddService(serviceName))
     .WithTracing(tracing => tracing
+        .AddSource(BasketMetrics.ActivitySourceName)
         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
@@ -73,6 +81,7 @@ builder.Services.AddOpenTelemetry()
     )
     .WithMetrics(metrics => metrics
         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+        .AddMeter(BasketMetrics.MeterName)
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
         .AddHttpClientInstrumentation()

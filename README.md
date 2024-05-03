@@ -48,8 +48,8 @@ k6 run -o experimental-prometheus-rw script.js
 
 ### Basket
 
-- [ ] Total de Carrinhos Criados | `Counter`
-- [ ] Total de Carrinhos Removidos | `Counter`
+- [x] Total de Carrinhos Criados | `Counter`
+- [x] Total de Carrinhos Removidos | `Counter`
 - [ ] Quantidade de Produtos por Carrinho (tag categorias) | `Histograma` - TODO add categoria nos produtos
 
 ### Products
@@ -63,9 +63,9 @@ k6 run -o experimental-prometheus-rw script.js
   
 ### Pedidos
 
-- [ ] Duração da Criação de Pedidos | `Histograma`
+- [x] Duração da Criação de Pedidos | `Histograma`
 - [ ] Total de Pedidos Criados | `Counter`
 - [ ] Número de Pedidos em Aberto | `Gauge`
 - [ ] Quantidade de Produtos Por Pedido | `Histograma`
 - [ ] Valores por Pedido | `Histograma`
-- [ ] Tempo de Confirmação de Pedido - TODO medodo para confirmar pedido | `Histograma`
+- [x] Tempo de Confirmação de Pedido | `Histograma`

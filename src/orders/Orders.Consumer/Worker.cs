@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Confluent.Kafka;
+using Orders.Consumer.Metrics;
 using Orders.Consumer.Models;
 using Orders.Consumer.Repositories;
 
@@ -10,12 +11,18 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _configuration;
     private readonly OrderRepository _repository;
+    private readonly OrdersConsumerMetrics _metrics;
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration, OrderRepository repository)
+    public Worker(
+        ILogger<Worker> logger, 
+        IConfiguration configuration, 
+        OrderRepository repository, 
+        OrdersConsumerMetrics metrics)
     {
         _logger = logger;
         _configuration = configuration;
         _repository = repository;
+        _metrics = metrics;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -64,7 +71,12 @@ public class Worker : BackgroundService
 
                     await _repository.CreateAsync(order);
 
-                    _logger.LogInformation($"[ORDER SAVED]: '{order.OrderId}'");
+                    var orderProccessedAt = DateTime.UtcNow;
+                    var orderCreationDuration = (orderProccessedAt - order.CreatedAt).TotalMilliseconds;
+
+                    _logger.LogInformation("[ORDER PROCESSED]: '{OrderId}' | Duration: {duration}ms", order.OrderId, orderCreationDuration);
+
+                    _metrics.RecordOrderCreationDuration(orderCreationDuration);
                 }
                 catch (InvalidOperationException exception)
                 {

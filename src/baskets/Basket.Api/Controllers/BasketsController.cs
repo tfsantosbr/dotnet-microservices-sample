@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Basket.Api.Metrics;
 using Basket.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
@@ -13,17 +14,20 @@ public class BasketsController : ControllerBase
     private readonly IConnectionMultiplexer _redis;
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly BasketMetrics _metrics;
 
     public BasketsController(
         ILogger<BasketsController> logger,
         IConnectionMultiplexer redis,
         IConfiguration configuration,
-        IHttpClientFactory httpClientFactory)
+        IHttpClientFactory httpClientFactory,
+        BasketMetrics metrics)
     {
         _logger = logger;
         _redis = redis;
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;
+        _metrics = metrics;
     }
 
     // Public Methods
@@ -33,6 +37,9 @@ public class BasketsController : ControllerBase
     public async Task<IActionResult> CreateOrUpdate([FromBody] BasketModel request)
     {
         _logger.LogInformation("1. CONTROLLER: CreateOrUpdate {@request}", request);
+
+        if (request.Products is null || request.ProductsTotalQuantity == 0)
+            return BadRequest("Products cannot be null");
 
         request.User = await GetUserDetails(request.UserId);
 
@@ -51,6 +58,11 @@ public class BasketsController : ControllerBase
         await SaveBasket(newBasket);
 
         _logger.LogInformation("6. CONTROLLER: Basket created or updated {@request}", request);
+
+        // metrics
+
+        _metrics.AddBasket();
+        _metrics.RecordProductsByBasket(request.ProductsTotalQuantity);
 
         return Ok(request);
     }
@@ -77,6 +89,8 @@ public class BasketsController : ControllerBase
 
         await RemoveBasket(userId);
 
+        _metrics.RemoveBasket();
+
         return NoContent();
     }
 
@@ -88,7 +102,7 @@ public class BasketsController : ControllerBase
 
         var client = _httpClientFactory.CreateClient();
         client.BaseAddress = new Uri(_configuration["UsersApiEndpoint"]!);
-        
+
         var response = await client.GetAsync($"account/{userId}");
 
         response.EnsureSuccessStatusCode();

@@ -1,14 +1,58 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Orders.Consumer;
 using Orders.Consumer.Configurations;
 using Orders.Consumer.Configurations.HealthCheck.Publishers;
+using Orders.Consumer.Metrics;
 using Orders.Consumer.Repositories;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var configuration = context.Configuration;
+
+        // OPEN TELEMETRY =========================================================================================
+
+        const string serviceName = "orders-consumer";
+
+        // Metrics Class
+
+        services.AddSingleton<OrdersConsumerMetrics>();
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(serviceName))
+            .WithTracing(tracing => tracing
+                .AddSource(OrdersConsumerMetrics.ActivitySourceName)
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                .AddHttpClientInstrumentation()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri("http://otel-collector:4317")
+                )
+            )
+            .WithMetrics(metrics => metrics
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                .AddMeter(OrdersConsumerMetrics.MeterName)
+                .AddRuntimeInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddProcessInstrumentation()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri("http://otel-collector:4317")
+                )
+            );
+
+        // builder.Logging.AddOpenTelemetry(logging => logging
+        //         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+        //         .AddOtlpExporter(options =>
+        //             options.Endpoint = new Uri("http://otel-collector:4317")
+        //         )
+        //     );
+
+        // =======================================================================================================
+
 
         services.AddTransient<OrderRepository>();
 

@@ -11,7 +11,15 @@ namespace Orders.Consumer.Models
         public Guid OrderId { get; set; }
         public Guid UserId { get; set; }
         public DateTime CreatedAt { get; set; }
+        public OrderStatus Status { get; set; }
+        public DateTime? ConfirmedAt { get; set; }
 
         public IEnumerable<OrderItem>? Products { get; set; }
+    }
+
+    public enum OrderStatus
+    {
+        Pending,
+        Confirmed
     }
 }

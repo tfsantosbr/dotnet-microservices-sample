@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
+using Orders.Api.Metrics;
 using Orders.Api.Models;
+using Orders.Api.Repositories;
 
 namespace Orders.Api.Controllers;
 
@@ -10,12 +12,20 @@ namespace Orders.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly ILogger<OrdersController> _logger;
-    private IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
+    private readonly OrderRepository _repository;
+    private readonly OrdersApiMetrics _metrics;
 
-    public OrdersController(ILogger<OrdersController> logger, IConfiguration configuration)
+    public OrdersController(
+        ILogger<OrdersController> logger,
+        IConfiguration configuration,
+        OrderRepository repository,
+        OrdersApiMetrics metrics)
     {
         _logger = logger;
         _configuration = configuration;
+        _repository = repository;
+        _metrics = metrics;
     }
 
     // Public Methods
@@ -31,32 +41,51 @@ public class OrdersController : ControllerBase
         return Accepted();
     }
 
-    [HttpPut("{orderId}/confirm")]
-    public IActionResult ConfirmOrder(Guid orderId)
+    [HttpGet("{orderId}")]
+    public async Task<IActionResult> GetOrder(Guid orderId)
     {
-        var order = GetOrder(orderId);
-        
-        order.Confirm();
+        var order = await _repository.GetAsync(orderId);
+
+        if (order is null)
+        {
+            return NotFound("order not found");
+        }
 
         return Ok(order);
     }
 
-    private static OrderModel GetOrder(Guid orderId)
+    [HttpPut("{orderId}/confirm")]
+    public async Task<IActionResult> ConfirmOrder(Guid orderId)
     {
-        var random = new Random();
-        var randomDate = random.Next(1, 7);
+        var order = await _repository.GetAsync(orderId);
 
-        OrderModel order = new()
+        if (order is null)
         {
-            OrderId = orderId,
-            UserId = Guid.NewGuid(),
-            CreatedAt = DateTime.Now.AddDays(-randomDate),
-        };
+            return NotFound("order not found");
+        }
 
-        return order;
+        order.Confirm();
+
+        await _repository.UpdateAsync(order);
+
+        var durationInSeconds = GetConfirmationDurationMetric(order);
+
+        _logger.LogInformation("Order '{orderId}' confirmed. Duration: {durationInSeconds} seconds.", order.OrderId, durationInSeconds);
+
+        _metrics.RecordOrderConfirmationDuration(durationInSeconds);
+
+        return NoContent();
     }
 
     // Private Methods
+
+    private static double GetConfirmationDurationMetric(Order order)
+    {
+        if (!order.ConfirmedAt.HasValue)
+            return 0;
+
+        return (order.ConfirmedAt - order.CreatedAt).Value.TotalSeconds;
+    }
 
     private static string ConvertToCreateOrderToMessage(OrderModel request)
     {
