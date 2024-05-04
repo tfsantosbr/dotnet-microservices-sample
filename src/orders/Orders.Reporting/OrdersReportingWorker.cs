@@ -3,15 +3,15 @@ using Orders.Reporting.Repositories;
 
 namespace Orders.Reporting;
 
-public class UpdateOrdersPendingCountService : BackgroundService
+public class OrdersReportingWorker : BackgroundService
 {
     private readonly OrderRepository _repository;
     private readonly OrdersReportMetrics _metrics;
-    private ILogger<UpdateOrdersPendingCountService> _logger;
+    private ILogger<OrdersReportingWorker> _logger;
 
-    public UpdateOrdersPendingCountService(
+    public OrdersReportingWorker(
         OrderRepository repository, OrdersReportMetrics metrics, 
-        ILogger<UpdateOrdersPendingCountService> logger)
+        ILogger<OrdersReportingWorker> logger)
     {
         _repository = repository;
         _metrics = metrics;
@@ -36,7 +36,7 @@ public class UpdateOrdersPendingCountService : BackgroundService
                 + "Confirmed: {confirmed} | Total: {total}", 
                 pendingOrdersCount, confirmedOrdersCount, totalOrdersCount);
 
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
     }
 }

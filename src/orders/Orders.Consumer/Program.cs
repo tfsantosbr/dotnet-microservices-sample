@@ -55,8 +55,6 @@ var host = Host.CreateDefaultBuilder(args)
 
         // =======================================================================================================
 
-
-
         // health check
 
         services.AddHealthChecks()

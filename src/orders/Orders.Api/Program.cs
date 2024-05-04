@@ -1,11 +1,11 @@
 using Confluent.Kafka;
 using Eventflix.Api.Extensions.Configurations;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Orders.Api.Metrics;
 using Orders.Api.Repositories;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;

@@ -54,11 +54,8 @@ k6 run -o experimental-prometheus-rw script.js
 
 ### Products
 
-- [ ] Total de Produtos Adicionados | `Counter`
-- [ ] Total de Produtos Atualizados | `Counter`
-- [ ] Duração da Importação de Produtos | `Histograma`
-- [ ] Duração da Importação de Imagens de Produtos | `Histograma`
-- [ ] Total de Produtos Sendo Processados | `UpDownCounter`
+- [x] Duração da Importação de Produtos | `Histograma`
+- [x] Total de Importações de Produto Ativas | `UpDownCounter`
 - [ ] Total do Estoque de Produtos | `Gauge`
   
 ### Pedidos

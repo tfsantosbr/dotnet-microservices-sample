@@ -8,7 +8,7 @@ using OpenTelemetry.Trace;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddHostedService<UpdateOrdersPendingCountService>();
+builder.Services.AddHostedService<OrdersReportingWorker>();
 builder.Services.AddTransient<OrderRepository>();
 builder.Services.AddSingleton<OrdersReportMetrics>();
 

@@ -73,7 +73,7 @@ services:
     build:
       context: src/products/Products.Api
     ports:
-      - 8083:80
+      - 8083:8080
     networks:
       - microservices
 

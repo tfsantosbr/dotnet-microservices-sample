@@ -1,4 +1,7 @@
+using System.Diagnostics;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
+using Products.Api.Metrics;
 
 namespace Products.Api.Controllers;
 
@@ -7,40 +10,50 @@ namespace Products.Api.Controllers;
 public class ProductsImportController : ControllerBase
 {
     private readonly ILogger<ProductsImportController> _logger;
+    private readonly ProductsApiMetrics _metrics;
 
-    public ProductsImportController(ILogger<ProductsImportController> logger)
+    public ProductsImportController(ILogger<ProductsImportController> logger, ProductsApiMetrics metrics)
     {
         _logger = logger;
+        _metrics = metrics;
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Import(CancellationToken cancelationToken)
+    public IActionResult Import([FromBody] int TotalProducts, CancellationToken cancelationToken)
     {
-        // code for consume CPU
-
-        var endTime = DateTime.UtcNow.AddSeconds(3);
-
-        try
+        var task = Task.Run(async () =>
         {
-            _logger.LogInformation($"Start processing at: {DateTime.UtcNow:HH:mm:ss.fff}");
+            var importId = Guid.NewGuid().ToString()[..8];
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            while (DateTime.UtcNow <= endTime)
+            _logger.LogInformation("[PRODUCTS IMPORT] Importing ID: {importId} -> {TotalProducts} products...",
+                importId, TotalProducts);
+
+            _metrics.IncreaseActiveImports();
+
+            for (int i = 0; i < TotalProducts; i++)
             {
-                cancelationToken.ThrowIfCancellationRequested();
+                // simulate a product import
+                await Task.Delay(500);
+
+                _logger.LogInformation("[PRODUCTS IMPORT] Imported product {ProductNumber}", i + 1);
             }
 
-            _logger.LogInformation($"Process terminated at: {DateTime.UtcNow:HH:mm:ss.fff}");
-        }
-        catch (OperationCanceledException exception)
-        {
-            _logger.LogInformation($"Products import operation is canceled: {exception.Message}");
-        }
-        finally
-        {
-            await Task.CompletedTask;
-        }
+            stopwatch.Stop();
 
-        return Ok();
+            _logger.LogInformation("[PRODUCTS IMPORT] Import ID: {importId} finished. "
+                + "Imported {TotalProducts} products in {ElapsedSeconds}s",
+                importId,
+                TotalProducts,
+                stopwatch.Elapsed.TotalSeconds);
+
+            _metrics.DecreaseActiveImports();
+            _metrics.RecordImportProductsDucation(stopwatch.Elapsed.TotalSeconds);
+
+        }, cancelationToken);
+
+        return Accepted();
     }
 }
