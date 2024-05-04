@@ -1,8 +1,8 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Orders.Api.Models;
+using Orders.Reporting.Models;
 
-namespace Orders.Api.Repositories;
+namespace Orders.Reporting.Repositories;
 
 public class OrderRepository
 {
@@ -22,26 +22,18 @@ public class OrderRepository
             configuration.GetSection("OrdersDatabase:OrdersCollectionName").Value);
     }
 
-    public async Task<Order?> GetAsync(Guid orderId)
+    public async Task<long> CountPendingOrders()
     {
-        var order = await _booksCollection.FindAsync(x => x.OrderId == orderId);
-        return await order.FirstOrDefaultAsync();
+        return await _booksCollection.CountDocumentsAsync(x => x.Status == OrderStatus.Pending);
     }
 
-    public async Task UpdateAsync(Order order)
+    internal async Task<long> CountConfirmedOrders()
     {
-        await _booksCollection.ReplaceOneAsync(x => x.OrderId == order.OrderId, order);
+        return await _booksCollection.CountDocumentsAsync(x => x.Status == OrderStatus.Confirmed);
     }
 
-    public async Task ConfirmOrdersBatch()
+    internal async Task<long> CountTotalOrders()
     {
-        var orders = await _booksCollection.Find(x => x.Status == OrderStatus.Pending).ToListAsync();
-
-        foreach (var order in orders)
-        {
-            order.Status = OrderStatus.Confirmed;
-
-            await UpdateAsync(order);
-        }
+        return await _booksCollection.CountDocumentsAsync(new BsonDocument());
     }
 }

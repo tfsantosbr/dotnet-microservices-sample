@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Orders.Api.Repositories;
 
 namespace Orders.Api.Metrics;
 
@@ -16,7 +17,7 @@ public class OrdersApiMetrics : IDisposable
         ActivitySource = new ActivitySource(ActivitySourceName, version);
         Meter = new Meter(MeterName, version);
 
-        OrderConfirmationDuration = Meter.CreateHistogram<double>(name: "orders.confirmation.duration", unit: "seconds" , description: "Duration of order confirmation in minutes");
+        OrderConfirmationDuration = Meter.CreateHistogram<double>(name: "orders.confirmation.duration", unit: "seconds", description: "Duration of order confirmation in minutes");
     }
 
     // Properties
@@ -29,6 +30,8 @@ public class OrdersApiMetrics : IDisposable
 
     public void Dispose()
     {
+        Meter.Dispose();
+        ActivitySource.Dispose();
         GC.SuppressFinalize(this);
     }
 }

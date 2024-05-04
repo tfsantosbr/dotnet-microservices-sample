@@ -64,8 +64,9 @@ k6 run -o experimental-prometheus-rw script.js
 ### Pedidos
 
 - [x] Duração da Criação de Pedidos | `Histograma`
-- [ ] Total de Pedidos Criados | `Counter`
-- [ ] Número de Pedidos em Aberto | `Gauge`
+- [x] Total de Pedidos Criados | `Gauge`
+- [x] Total de Pedidos Pendentes | `Gauge`
+- [x] Total de Pedidos Confirmados | `Gauge`
 - [ ] Quantidade de Produtos Por Pedido | `Histograma`
 - [ ] Valores por Pedido | `Histograma`
 - [x] Tempo de Confirmação de Pedido | `Histograma`

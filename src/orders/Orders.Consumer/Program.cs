@@ -1,7 +1,5 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Orders.Consumer;
 using Orders.Consumer.Configurations;
 using Orders.Consumer.Configurations.HealthCheck.Publishers;
@@ -9,11 +7,15 @@ using Orders.Consumer.Metrics;
 using Orders.Consumer.Repositories;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var configuration = context.Configuration;
+        
+        services.AddTransient<OrderRepository>();
 
         // OPEN TELEMETRY =========================================================================================
 
@@ -54,7 +56,6 @@ var host = Host.CreateDefaultBuilder(args)
         // =======================================================================================================
 
 
-        services.AddTransient<OrderRepository>();
 
         // health check
 

@@ -54,7 +54,7 @@ public class OrdersController : ControllerBase
         return Ok(order);
     }
 
-    [HttpPut("{orderId}/confirm")]
+    [HttpPut("{orderId}/confirmation")]
     public async Task<IActionResult> ConfirmOrder(Guid orderId)
     {
         var order = await _repository.GetAsync(orderId);
@@ -73,6 +73,14 @@ public class OrdersController : ControllerBase
         _logger.LogInformation("Order '{orderId}' confirmed. Duration: {durationInSeconds} seconds.", order.OrderId, durationInSeconds);
 
         _metrics.RecordOrderConfirmationDuration(durationInSeconds);
+
+        return NoContent();
+    }
+
+    [HttpPut("confirmation/batch")]
+    public async Task<IActionResult> ConfirmOrdersBatch()
+    {
+        await _repository.ConfirmOrdersBatch();
 
         return NoContent();
     }

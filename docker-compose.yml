@@ -57,6 +57,15 @@ services:
     restart: on-failure
     networks:
         - microservices
+  
+  orders-reporting:
+    container_name: orders-reporting
+    image: orders-reporting
+    build:
+      context: src/orders/Orders.Reporting
+    restart: on-failure
+    networks:
+        - microservices
 
   products-api:
     container_name: products-api
