@@ -38,6 +38,7 @@ k6 run -o experimental-prometheus-rw script.js
 ## Documentation Reference
 
 [Trace logs with Grafana Tempo and Loki](https://grafana.com/docs/grafana/next/datasources/tempo/configure-tempo-data-source/#trace-to-logs)
+https://www.youtube.com/watch?v=YZ_bG4FKU9E
 
 ## Grafana Dashboards
 
@@ -54,13 +55,12 @@ k6 run -o experimental-prometheus-rw script.js
 
 - [x] Total de Carrinhos Criados | `Counter`
 - [x] Total de Carrinhos Removidos | `Counter`
-- [ ] Quantidade de Produtos por Carrinho (tag categorias) | `Histograma` - TODO add categoria nos produtos
+- [x] Quantidade de carrinhos por cidade | `Histograma`
 
 ### Products
 
 - [x] Duração da Importação de Produtos | `Histograma`
 - [x] Total de Importações de Produto Ativas | `UpDownCounter`
-- [ ] Total do Estoque de Produtos | `Gauge`
   
 ### Pedidos
 
@@ -68,5 +68,5 @@ k6 run -o experimental-prometheus-rw script.js
 - [x] Total de Pedidos Criados | `Gauge`
 - [x] Total de Pedidos Pendentes | `Gauge`
 - [x] Total de Pedidos Confirmados | `Gauge`
-- [ ] Valores por Pedido | `Histograma`
+- [x] Valores por Pedido | `Histograma`
 - [x] Tempo de Confirmação de Pedido | `Histograma`
