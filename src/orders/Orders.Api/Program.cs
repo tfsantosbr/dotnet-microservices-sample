@@ -45,12 +45,12 @@ builder.Services.AddOpenTelemetry()
         )
     );
 
-// builder.Logging.AddOpenTelemetry(logging => logging
-//         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-//         .AddOtlpExporter(options =>
-//             options.Endpoint = new Uri("http://otel-collector:4317")
-//         )
-//     );
+builder.Logging.AddOpenTelemetry(logging => logging
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+        .AddOtlpExporter(options =>
+            options.Endpoint = new Uri("http://otel-collector:4317")
+        )
+    );
 
 // =======================================================================================================
 

@@ -18,8 +18,6 @@ public class ProductsApiMetrics : IDisposable
 
         ActiveImportsCount = Meter.CreateUpDownCounter<int>("products.imports.active.count");
         ImportProductsDucation = Meter.CreateHistogram<double>("products.import.duration", "seconds");
-
-        Meter.creat
     }
 
     // Properties

@@ -43,6 +43,10 @@ k6 run -o experimental-prometheus-rw script.js
 
 [New K6 Load Testing Results -> Mais Preciso](https://grafana.com/grafana/dashboards/14796-new-k6-load-testing-results)
 [k6 Load Testing Results -> Mais Popular](https://grafana.com/grafana/dashboards/2587-k6-load-testing-results)
+[ASP.NET OTEL Metrics](https://grafana.com/grafana/dashboards/17706-asp-net-otel-metrics/)
+[ASP.NET Core](https://grafana.com/grafana/dashboards/19924-asp-net-core/)
+[ASP.NET Core Endpoint](https://grafana.com/grafana/dashboards/19925-asp-net-core-endpoint)
+[ASP.NET OTEL Metrics from OTEL Collector](https://grafana.com/grafana/dashboards/19896-asp-net-otel-metrics-from-otel-collector/)
 
 ## Métricas
 
@@ -64,6 +68,5 @@ k6 run -o experimental-prometheus-rw script.js
 - [x] Total de Pedidos Criados | `Gauge`
 - [x] Total de Pedidos Pendentes | `Gauge`
 - [x] Total de Pedidos Confirmados | `Gauge`
-- [ ] Quantidade de Produtos Por Pedido | `Histograma`
 - [ ] Valores por Pedido | `Histograma`
 - [x] Tempo de Confirmação de Pedido | `Histograma`

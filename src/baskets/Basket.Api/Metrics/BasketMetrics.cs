@@ -29,9 +29,11 @@ public class BasketMetrics : IDisposable
 
     // Public Methods
 
-    public void AddBasket() => TotalBasketsCreated.Add(1);
+    public void AddBasket(string city) => 
+        TotalBasketsCreated.Add(1, new KeyValuePair<string, object?>("city", city));
     public void RemoveBasket() => TotalBasketsRemoved.Add(1);
-    public void RecordProductsByBasket(int productsQuantity) => TotalProductsByBasket.Record(productsQuantity);
+    public void RecordProductsByBasket(int productsQuantity, string city) => 
+        TotalProductsByBasket.Record(productsQuantity, new KeyValuePair<string, object?>("city", city));
 
     public void Dispose()
     {

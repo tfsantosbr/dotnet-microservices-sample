@@ -27,9 +27,9 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        string topic = _configuration["Kafka:Topics:CreateOrderTopic"];
-        string groupId = _configuration["Kafka:GroupId"];
-        string bootstrapServers = _configuration["Kafka:BootstrapServers"];
+        string topic = _configuration["Kafka:Topics:CreateOrderTopic"]!;
+        string groupId = _configuration["Kafka:GroupId"]!;
+        string bootstrapServers = _configuration["Kafka:BootstrapServers"]!;
 
         _logger.LogInformation($"Conectando ao Kafka: {bootstrapServers}");
 
@@ -73,10 +73,12 @@ public class Worker : BackgroundService
 
                     var orderProccessedAt = DateTime.UtcNow;
                     var orderCreationDuration = (orderProccessedAt - order.CreatedAt).TotalMilliseconds;
+                    var orderPrice = order.Products!.Sum(p => p.Price);
 
-                    _logger.LogInformation("[ORDER PROCESSED]: '{OrderId}' | Duration: {duration}ms", order.OrderId, orderCreationDuration);
+                    _logger.LogInformation("[ORDER PROCESSED]: '{OrderId}' | Price '{Price}' | Duration: {duration}ms", order.OrderId,orderPrice, orderCreationDuration);
 
                     _metrics.RecordOrderCreationDuration(orderCreationDuration);
+                    _metrics.RecordOrderPrice((double)orderPrice);
                 }
                 catch (InvalidOperationException exception)
                 {

@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Products.Api.Domain.Products;
 using Products.Api.Domain.Products.Commands;

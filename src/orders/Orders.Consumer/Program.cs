@@ -10,16 +10,16 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
+const string serviceName = "orders-consumer";
+
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var configuration = context.Configuration;
-        
+
         services.AddTransient<OrderRepository>();
 
         // OPEN TELEMETRY =========================================================================================
-
-        const string serviceName = "orders-consumer";
 
         // Metrics Class
 
@@ -46,13 +46,6 @@ var host = Host.CreateDefaultBuilder(args)
                 )
             );
 
-        // builder.Logging.AddOpenTelemetry(logging => logging
-        //         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-        //         .AddOtlpExporter(options =>
-        //             options.Endpoint = new Uri("http://otel-collector:4317")
-        //         )
-        //     );
-
         // =======================================================================================================
 
         // health check
@@ -72,6 +65,16 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddHostedService<Worker>();
     })
+    .ConfigureLogging(logging =>
+    {
+        logging.AddOpenTelemetry(logging => logging
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+            .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri("http://otel-collector:4317")
+                )
+            );
+    })
+
     .AddLogs()
     .Build();
 

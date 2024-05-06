@@ -17,18 +17,23 @@ public class OrdersConsumerMetrics : IDisposable
         Meter = new Meter(MeterName, version);
 
         OrderCreatrionDuration = Meter.CreateHistogram<double>(name: "orders.creation.duration", unit: "milliseconds" , description: "Duration of orders creation in milliseconds");
+        OrderPrice = Meter.CreateHistogram<double>(name: "orders.price", description: "Price of orders");
     }
 
     // Properties
 
     private Histogram<double> OrderCreatrionDuration { get; }
+    private Histogram<double> OrderPrice { get; }
 
     // Public Methods
 
     public void RecordOrderCreationDuration(double duration) => OrderCreatrionDuration.Record(duration);
+    public void RecordOrderPrice(double price) => OrderPrice.Record(price);
 
     public void Dispose()
     {
+        Meter.Dispose();
+        ActivitySource.Dispose();
         GC.SuppressFinalize(this);
     }
 }

@@ -61,8 +61,8 @@ public class BasketsController : ControllerBase
 
         // metrics
 
-        _metrics.AddBasket();
-        _metrics.RecordProductsByBasket(request.ProductsTotalQuantity);
+        _metrics.AddBasket(newBasket.City);
+        _metrics.RecordProductsByBasket(request.ProductsTotalQuantity, newBasket.City);
 
         return Ok(request);
     }
