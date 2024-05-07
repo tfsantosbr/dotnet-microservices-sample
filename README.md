@@ -48,6 +48,7 @@ https://www.youtube.com/watch?v=YZ_bG4FKU9E
 [ASP.NET Core](https://grafana.com/grafana/dashboards/19924-asp-net-core/)
 [ASP.NET Core Endpoint](https://grafana.com/grafana/dashboards/19925-asp-net-core-endpoint)
 [ASP.NET OTEL Metrics from OTEL Collector](https://grafana.com/grafana/dashboards/19896-asp-net-otel-metrics-from-otel-collector/)
+[Alertmanager](https://grafana.com/grafana/dashboards/9578-alertmanager/)
 
 ## Métricas
 

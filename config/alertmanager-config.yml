@@ -1,8 +1,8 @@
 global:
   smtp_smarthost: sandbox.smtp.mailtrap.io:587
-  smtp_from: tfsantosbr@gmail.com
-  smtp_auth_username: b9d14bc214c076
-  smtp_auth_password: 3d7a402c6a6c5c
+  smtp_from: ${SMTP_FROM}
+  smtp_auth_username: ${SMTP_USER}
+  smtp_auth_password: ${SMTP_PASSWORD}
   
 route:
   group_by: ['alertname']
@@ -15,5 +15,5 @@ receivers:
 
   - name: 'email'
     email_configs:
-    - to: tfsantosbr@gmail.com
+    - to: ${SMTP_TO}
       send_resolved: true
