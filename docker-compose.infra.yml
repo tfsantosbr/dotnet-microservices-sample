@@ -1,4 +1,3 @@
-version: '3'
 services:
   # DATABASES
 
@@ -15,11 +14,11 @@ services:
       - microservices
 
   mssql:
-    image: 'mcr.microsoft.com/mssql/server'
+    image: "mcr.microsoft.com/mssql/server"
     container_name: mssql
     environment:
-      SA_PASSWORD: 'Dev@123456'
-      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: "Dev@123456"
+      ACCEPT_EULA: "Y"
     ports:
       - 1433:1433
     networks:
@@ -82,7 +81,7 @@ services:
     container_name: kafka-setup
     depends_on:
       - kafka
-    entrypoint: ['/bin/sh', '-c']
+    entrypoint: ["/bin/sh", "-c"]
     networks:
       - microservices
     command: |

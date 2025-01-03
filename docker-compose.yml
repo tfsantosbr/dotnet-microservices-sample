@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   # MICROSERVICES
 
@@ -33,7 +33,7 @@ services:
       - KAFKA__BOOTSTRAPSERVERS=kafka:29092
     restart: on-failure
     networks:
-        - microservices
+      - microservices
 
   products-api:
     container_name: products-api
