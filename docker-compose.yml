@@ -11,8 +11,8 @@ services:
     networks:
       - microservices
 
-  orders-api-1:
-    container_name: orders-api-1
+  orders-api:
+    container_name: orders-api
     image: orders-api
     build:
       context: src/orders/Orders.Api
@@ -20,30 +20,6 @@ services:
       - KAFKA__BOOTSTRAPSERVERS=kafka:29092
     ports:
       - 8082:80
-    networks:
-      - microservices
-
-  orders-api-2:
-    container_name: orders-api-2
-    image: orders-api
-    build:
-      context: src/orders/Orders.Api
-    environment:
-      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-    ports:
-      - 8085:80
-    networks:
-      - microservices
-
-  orders-api-3:
-    container_name: orders-api-3
-    image: orders-api
-    build:
-      context: src/orders/Orders.Api
-    environment:
-      - KAFKA__BOOTSTRAPSERVERS=kafka:29092
-    ports:
-      - 8087:80
     networks:
       - microservices
 
@@ -56,8 +32,8 @@ services:
       - KAFKA__BOOTSTRAPSERVERS=kafka:29092
     restart: on-failure
     networks:
-        - microservices
-  
+      - microservices
+
   orders-reporting:
     container_name: orders-reporting
     image: orders-reporting
@@ -65,7 +41,7 @@ services:
       context: src/orders/Orders.Reporting
     restart: on-failure
     networks:
-        - microservices
+      - microservices
 
   products-api:
     container_name: products-api
