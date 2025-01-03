@@ -2,7 +2,7 @@ services:
   # DATABASES
 
   postgres:
-    container_name: postgres
+    container_name: ms-postgres
     image: postgres
     environment:
       POSTGRES_USER: postgres
@@ -15,7 +15,7 @@ services:
 
   mssql:
     image: "mcr.microsoft.com/mssql/server"
-    container_name: mssql
+    container_name: ms-mssql
     environment:
       SA_PASSWORD: "Dev@123456"
       ACCEPT_EULA: "Y"
@@ -26,7 +26,7 @@ services:
 
   mongo:
     image: mongo
-    container_name: mongo
+    container_name: ms-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -37,7 +37,7 @@ services:
 
   redis:
     image: redis
-    container_name: redis
+    container_name: ms-redis
     command: redis-server --requirepass redis --appendonly yes
     hostname: redis
     ports:
@@ -49,7 +49,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
-    container_name: zookeeper
+    container_name: ms-zookeeper
     ports:
       - 2181:2181
     environment:
@@ -59,7 +59,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:latest
-    container_name: kafka
+    container_name: ms-kafka
     depends_on:
       - zookeeper
     ports:
@@ -78,7 +78,7 @@ services:
 
   kafka-setup:
     image: confluentinc/cp-kafka:latest
-    container_name: kafka-setup
+    container_name: ms-kafka-setup
     depends_on:
       - kafka
     entrypoint: ["/bin/sh", "-c"]
@@ -98,7 +98,7 @@ services:
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
-    container_name: kafdrop
+    container_name: ms-kafdrop
     depends_on:
       - kafka
     ports:
@@ -110,3 +110,4 @@ services:
 
 networks:
   microservices:
+    driver: bridge

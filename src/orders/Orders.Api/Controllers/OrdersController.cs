@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
+using Orders.Api.Metrics;
 using Orders.Api.Models;
+using Orders.Api.Repositories;
 
 namespace Orders.Api.Controllers;
 
@@ -10,12 +12,20 @@ namespace Orders.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly ILogger<OrdersController> _logger;
-    private IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
+    private readonly OrderRepository _repository;
+    private readonly OrdersApiMetrics _metrics;
 
-    public OrdersController(ILogger<OrdersController> logger, IConfiguration configuration)
+    public OrdersController(
+        ILogger<OrdersController> logger,
+        IConfiguration configuration,
+        OrderRepository repository,
+        OrdersApiMetrics metrics)
     {
         _logger = logger;
         _configuration = configuration;
+        _repository = repository;
+        _metrics = metrics;
     }
 
     // Public Methods
@@ -31,9 +41,61 @@ public class OrdersController : ControllerBase
         return Accepted();
     }
 
+    [HttpGet("{orderId}")]
+    public async Task<IActionResult> GetOrder(Guid orderId)
+    {
+        var order = await _repository.GetAsync(orderId);
+
+        if (order is null)
+        {
+            return NotFound("order not found");
+        }
+
+        return Ok(order);
+    }
+
+    [HttpPut("{orderId}/confirmation")]
+    public async Task<IActionResult> ConfirmOrder(Guid orderId)
+    {
+        var order = await _repository.GetAsync(orderId);
+
+        if (order is null)
+        {
+            return NotFound("order not found");
+        }
+
+        order.Confirm();
+
+        await _repository.UpdateAsync(order);
+
+        var durationInSeconds = GetConfirmationDurationMetric(order);
+
+        _logger.LogInformation("Order '{orderId}' confirmed. Duration: {durationInSeconds} seconds.", order.OrderId, durationInSeconds);
+
+        _metrics.RecordOrderConfirmationDuration(durationInSeconds);
+
+        return NoContent();
+    }
+
+    [HttpPut("confirmation/batch")]
+    public async Task<IActionResult> ConfirmOrdersBatch()
+    {
+        await _repository.ConfirmOrdersBatch();
+
+        return NoContent();
+    }
+
     // Private Methods
 
-    private string ConvertToCreateOrderToMessage(OrderModel request)
+    private static double GetConfirmationDurationMetric(Order order)
+    {
+        if (!order.ConfirmedAt.HasValue)
+            return 0;
+
+        return (order.ConfirmedAt - order.CreatedAt).Value.TotalSeconds;
+    }
+
+    private static string ConvertToCreateOrderToMessage(OrderModel request)
     {
         return JsonSerializer.Serialize(request);
     }

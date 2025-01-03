@@ -1,4 +1,3 @@
-version: "3"
 services:
   # MICROSERVICES
 
@@ -35,13 +34,22 @@ services:
     networks:
       - microservices
 
+  orders-reporting:
+    container_name: orders-reporting
+    image: orders-reporting
+    build:
+      context: src/orders/Orders.Reporting
+    restart: on-failure
+    networks:
+      - microservices
+
   products-api:
     container_name: products-api
     image: products-api
     build:
       context: src/products/Products.Api
     ports:
-      - 8083:80
+      - 8083:8080
     networks:
       - microservices
 
@@ -57,3 +65,4 @@ services:
 
 networks:
   microservices:
+    driver: bridge

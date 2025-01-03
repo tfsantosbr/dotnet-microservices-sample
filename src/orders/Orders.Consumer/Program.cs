@@ -3,7 +3,14 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Orders.Consumer;
 using Orders.Consumer.Configurations;
 using Orders.Consumer.Configurations.HealthCheck.Publishers;
+using Orders.Consumer.Metrics;
 using Orders.Consumer.Repositories;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+const string serviceName = "orders-consumer";
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -11,6 +18,35 @@ var host = Host.CreateDefaultBuilder(args)
         var configuration = context.Configuration;
 
         services.AddTransient<OrderRepository>();
+
+        // OPEN TELEMETRY =========================================================================================
+
+        // Metrics Class
+
+        services.AddSingleton<OrdersConsumerMetrics>();
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(serviceName))
+            .WithTracing(tracing => tracing
+                .AddSource(OrdersConsumerMetrics.ActivitySourceName)
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                .AddHttpClientInstrumentation()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri("http://otel-collector:4317")
+                )
+            )
+            .WithMetrics(metrics => metrics
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                .AddMeter(OrdersConsumerMetrics.MeterName)
+                .AddRuntimeInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddProcessInstrumentation()
+                .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri("http://otel-collector:4317")
+                )
+            );
+
+        // =======================================================================================================
 
         // health check
 
@@ -29,6 +65,16 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddHostedService<Worker>();
     })
+    .ConfigureLogging(logging =>
+    {
+        logging.AddOpenTelemetry(logging => logging
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+            .AddOtlpExporter(options =>
+                    options.Endpoint = new Uri("http://otel-collector:4317")
+                )
+            );
+    })
+
     .AddLogs()
     .Build();
 

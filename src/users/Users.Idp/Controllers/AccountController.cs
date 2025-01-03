@@ -24,6 +24,8 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateAccount request)
     {
+        _logger.LogInformation("Creating account for {Name}", request.Name);
+
         var user = new User(request.Name, request.Email, request.Password);
 
         await _context.Users.AddAsync(user);
@@ -36,6 +38,8 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> GetUser(Guid userId)
     {
+        _logger.LogInformation("3. CONTROLLER: GetUser: {userId}", userId);
+
         var fakeUser = await _userService.GetUserAsync(userId);
 
         return Ok(fakeUser);
@@ -45,6 +49,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult Delete(Guid userId)
     {
+        _logger.LogInformation("Deleting user {UserId}", userId);
         return NoContent();
     }
 }
